@@ -526,8 +526,20 @@
             const ct = document.getElementById('cobros-contenido');
             ct.innerHTML = '<div class="empty-state">Cargando...</div>';
             try {
-                const snap = await db.collection('creditos').where('pagado', '==', false).get();
-                const deu = []; snap.forEach(d => { const data = d.data(); deu.push({ id: d.id, cliente: data.cliente, telefono: data.telefono, deuda: data.total_bs, fecha: data.fecha }); });
+                const snap = await db.collection('creditos').get();
+                const deu = []; 
+                snap.forEach(d => { 
+                    const data = d.data(); 
+                    if (data.pagado !== true) {
+                        deu.push({ 
+                            id: d.id, 
+                            cliente: data.cliente, 
+                            telefono: data.telefono, 
+                            deuda: data.total_bs, 
+                            fecha: data.fecha 
+                        }); 
+                    }
+                });
                 if (!deu.length) { ct.innerHTML = '<div class="empty-state">🎉 No hay cuentas por cobrar</div>'; return; }
                 ct.innerHTML = deu.map(d =>
                     '<div class="product-item"><div class="product-info">' +
@@ -537,7 +549,7 @@
                     '</div>' +
                     '<button class="add-btn" style="background:#10B981;" onclick="sendCommand(\'/cobrar ' + (d.cliente || '').replace(/'/g, "\\'") + ' ' + (d.deuda || 0) + '\')">💰 Cobrar</button></div>'
                 ).join('');
-            } catch (e) { ct.innerHTML = '<div class="empty-state">Error</div>'; }
+            } catch (e) { ct.innerHTML = '<div class="empty-state">Error: ' + e.message + '</div>'; }
         }
 
         function agregarProveedor() {
