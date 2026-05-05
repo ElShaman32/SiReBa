@@ -7,6 +7,7 @@ const TIENDA = {
     logo: "logo.png",
     colorPrimario: "#8B5CF6",
     colorSecundario: "#6D28D9",
+    webhookUrl: "https://TU-TUNEL.trycloudflare.com/webhook/siemba-webhook""
     firebase: {
         apiKey: "AIzaSyDiqM2oykoa-EkTJoFPQSdejjqRthdWxQY",
         authDomain: "saas-universal-app.firebaseapp.com",
