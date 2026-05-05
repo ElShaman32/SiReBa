@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SiReBa POS</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore-compat.js"></script>
+    <script src="config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a1a; color: #fff; min-height: 100vh; padding: 16px; -webkit-tap-highlight-color: transparent; user-select: none; }
+        .app-container { max-width: 420px; margin: 0 auto; }
+        .header { text-align: center; padding: 20px 0; margin-bottom: 10px; }
+        .logo-container { width: 70px; height: 70px; background: linear-gradient(135deg, var(--pri, #8B5CF6), var(--sec, #6D28D9)); border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 24px; font-weight: bold; box-shadow: 0 4px 20px rgba(139,92,246,0.3); overflow: hidden; }
+        .logo-container img { width: 100%; height: 100%; object-fit: cover; }
+        .business-name { font-size: 26px; font-weight: bold; background: linear-gradient(135deg, var(--pri, #8B5CF6), #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
+        .business-rif { font-size: 12px; color: #666; }
+        .user-info { background: #2a2a2a; border-radius: 14px; padding: 14px 16px; margin-bottom: 20px; border: 1px solid #3a3a3a; display: flex; align-items: center; gap: 12px; }
+        .user-avatar { width: 44px; height: 44px; background: linear-gradient(135deg, var(--pri, #8B5CF6), var(--sec, #6D28D9)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .user-details { flex: 1; min-width: 0; }
+        .user-name { font-size: 15px; font-weight: 600; }
+        .user-id { font-size: 12px; color: #888; }
+        .user-role { font-size: 11px; color: #A78BFA; }
+        .screen { display: none; animation: fadeIn 0.2s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .main-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        .menu-btn { background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 14px; padding: 18px 14px; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 10px; text-align: left; width: 100%; }
+        .menu-btn:active { background: #3a3a3a; border-color: var(--pri, #8B5CF6); transform: scale(0.97); }
+        .menu-btn .icon { font-size: 22px; flex-shrink: 0; }
+        .menu-btn .label { flex: 1; line-height: 1.2; }
+        .menu-btn.full-width { grid-column: 1 / -1; }
+        .menu-btn.highlight { background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(109,40,217,0.2)); border-color: var(--pri, #8B5CF6); }
+        .sub-menu { display: flex; flex-direction: column; gap: 10px; }
+        .sub-btn { background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 14px; padding: 16px 18px; color: #fff; font-size: 15px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; }
+        .sub-btn:active { background: #3a3a3a; border-color: var(--pri, #8B5CF6); transform: scale(0.98); }
+        .form-group { margin-bottom: 14px; }
+        .form-label { display: block; font-size: 13px; color: #A78BFA; margin-bottom: 6px; font-weight: 500; }
+        .form-input { width: 100%; padding: 14px 16px; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 12px; color: #fff; font-size: 15px; transition: all 0.2s ease; }
+        .form-input:focus { outline: none; border-color: var(--pri, #8B5CF6); box-shadow: 0 0 0 3px rgba(139,92,246,0.1); }
+        .form-input::placeholder { color: #666; }
+        select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px; }
+        .btn-row { display: flex; gap: 10px; margin-top: 6px; }
+        .btn-primary { flex: 1; padding: 14px; background: linear-gradient(135deg, var(--pri, #8B5CF6), var(--sec, #6D28D9)); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
+        .btn-secondary { flex: 1; padding: 14px; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 12px; color: #fff; font-size: 15px; cursor: pointer; transition: all 0.2s ease; }
+        .btn-secondary:active { background: #3a3a3a; }
+        .btn-danger { background: rgba(239,68,68,0.2); border: 1px solid #EF4444; color: #EF4444; }
+        .btn-full { width: 100%; margin-top: 8px; }
+        .cart-container { background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 14px; padding: 14px; margin-top: 16px; max-height: 200px; overflow-y: auto; }
+        .cart-title { font-size: 14px; font-weight: 600; color: #A78BFA; margin-bottom: 10px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #3a3a3a; font-size: 14px; }
+        .cart-item:last-child { border-bottom: none; }
+        .cart-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; margin-top: 10px; padding-top: 10px; border-top: 2px solid var(--pri, #8B5CF6); color: #A78BFA; }
+        .search-box { position: relative; margin-bottom: 14px; }
+        .search-box .form-input { padding-left: 44px; }
+        .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 18px; color: #888; }
+        .product-list { max-height: 250px; overflow-y: auto; margin-bottom: 14px; }
+        .product-item { background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .product-info { flex: 1; }
+        .product-name { font-weight: 600; font-size: 14px; }
+        .product-price { font-size: 12px; color: #A78BFA; }
+        .product-price-usd { font-size: 10px; color: #888; }
+        .product-stock { font-size: 11px; color: #888; }
+        .add-btn { background: var(--pri, #8B5CF6); border: none; border-radius: 10px; padding: 8px 16px; color: #fff; font-weight: 600; cursor: pointer; font-size: 13px; }
+        .add-btn:active { background: var(--sec, #6D28D9); }
+        .qty-input { width: 50px; padding: 8px; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 8px; color: #fff; text-align: center; font-size: 13px; }
+        .ticket { background: #2a2a2a; border: 2px solid var(--pri, #8B5CF6); border-radius: 16px; padding: 20px; max-width: 350px; margin: 0 auto; }
+        .ticket-header { text-align: center; margin-bottom: 16px; }
+        .ticket-logo { width: 50px; height: 50px; background: linear-gradient(135deg, var(--pri, #8B5CF6), var(--sec, #6D28D9)); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 18px; overflow: hidden; }
+        .ticket-logo img { width: 100%; height: 100%; object-fit: cover; }
+        .ticket-business { font-size: 18px; font-weight: 700; color: #A78BFA; }
+        .ticket-rif { font-size: 11px; color: #666; }
+        .ticket-divider { border: none; border-top: 1px dashed #3a3a3a; margin: 12px 0; }
+        .ticket-row { display: flex; justify-content: space-between; font-size: 13px; margin: 4px 0; }
+        .ticket-row.total { font-size: 16px; font-weight: 700; color: #A78BFA; margin-top: 8px; }
+        .back-btn { display: flex; align-items: center; gap: 8px; background: none; border: none; color: #888; font-size: 14px; cursor: pointer; padding: 8px 0; margin-bottom: 14px; }
+        .back-btn:active { color: #A78BFA; }
+        .footer { text-align: center; margin-top: 20px; color: #555; font-size: 11px; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 2px; }
+        .empty-state { text-align: center; padding: 30px; color: #666; font-size: 14px; }
+        .badge { display: inline-block; background: rgba(139,92,246,0.2); color: #A78BFA; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- PANTALLA PRINCIPAL -->
+        <div class="screen active" id="screen-main">
+            <div class="header">
+                <div class="logo-container"><img src="logo.png" alt="Logo" onerror="this.style.display='none';this.parentElement.textContent=TIENDA.nombre.charAt(0)"></div>
+                <div class="business-name"></div>
+                <div class="business-rif"></div>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">👤</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">Cargando...</div>
+                    <div class="user-id" id="userId">ID: ---</div>
+                    <div class="user-role">Administrador</div>
+                </div>
+            </div>
+            <div class="main-menu">
+                <button class="menu-btn" onclick="navigateTo('reporte')"><span class="icon">📊</span><span class="label">Reporte De Ventas</span></button>
+                <button class="menu-btn highlight" onclick="navigateTo('vender')"><span class="icon">🛒</span><span class="label">Vender</span></button>
+                <button class="menu-btn highlight" onclick="navigateTo('credito')"><span class="icon">💰</span><span class="label">Crédito</span></button>
+                <button class="menu-btn" onclick="navigateTo('actualizar')"><span class="icon">📦</span><span class="label">Actualizar Inventario</span></button>
+                <button class="menu-btn" onclick="navigateTo('ajustar')"><span class="icon">💲</span><span class="label">Ajustar Tasa</span></button>
+                <button class="menu-btn" onclick="navigateTo('catalogo')"><span class="icon">📖</span><span class="label">Catálogo</span></button>
+                <button class="menu-btn" onclick="navigateTo('cobros')"><span class="icon">🤑</span><span class="label">Cobros</span></button>
+                <button class="menu-btn" onclick="navigateTo('proveedores')"><span class="icon">🏭</span><span class="label">Proveedores</span></button>
+                <button class="menu-btn full-width" onclick="navigateTo('ayuda')">
+                    <span style="font-size:18px;">❓</span><span class="label">Ayuda</span><span style="font-size:18px;">🆘</span>
+                </button>
+            </div>
+            <div class="footer" id="footer-text"></div>
+        </div>
+
+        <!-- REPORTE -->
+        <div class="screen" id="screen-reporte">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">📊 Reporte De Ventas</h2>
+            <div class="sub-menu">
+                <button class="sub-btn" onclick="sendCommand('/reporte hoy')">📅 Hoy</button>
+                <button class="sub-btn" onclick="sendCommand('/reporte ayer')">📆 Ayer</button>
+                <button class="sub-btn" onclick="sendCommand('/reporte semana')">📊 Esta Semana</button>
+                <button class="sub-btn" onclick="navigateTo('reporte-personalizado')">🗓️ Período Personalizado</button>
+            </div>
+        </div>
+
+        <!-- REPORTE PERSONALIZADO -->
+        <div class="screen" id="screen-reporte-personalizado">
+            <button class="back-btn" onclick="navigateTo('reporte')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">🗓️ Período Personalizado</h2>
+            <div class="form-group"><label class="form-label">Desde</label><input type="date" id="fecha-desde" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Hasta</label><input type="date" id="fecha-hasta" class="form-input"></div>
+            <button class="btn-primary btn-full" onclick="generarReportePersonalizado()">📊 Generar Reporte</button>
+        </div>
+
+        <!-- VENDER -->
+        <div class="screen" id="screen-vender">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">🛒 Vender</h2>
+            <div class="form-group"><label class="form-label">👤 Nombre del Cliente</label><input type="text" id="vender-cliente" class="form-input" placeholder="Nombre del cliente"></div>
+            <div class="form-group"><label class="form-label">📱 Teléfono</label><input type="tel" id="vender-telefono" class="form-input" placeholder="04121234567"></div>
+            <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="vender-buscar" class="form-input" placeholder="Buscar producto..." oninput="filtrarProductos('vender')"></div>
+            <div class="product-list" id="vender-lista-productos"></div>
+            <div class="cart-container"><div class="cart-title">📋 Carrito</div><div id="vender-items"></div><div class="cart-total"><span>TOTAL:</span><span id="vender-total">Bs. 0,00</span></div></div>
+            <div class="btn-row">
+                <button class="btn-secondary btn-danger" onclick="vaciarCarrito('vender')">🗑️ Vaciar</button>
+                <button class="btn-primary" onclick="finalizarVenta('contado')">✅ Finalizar Venta</button>
+            </div>
+        </div>
+
+        <!-- CRÉDITO -->
+        <div class="screen" id="screen-credito">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">💰 Venta a Crédito</h2>
+            <div class="form-group"><label class="form-label">👤 Nombre del Cliente</label><input type="text" id="credito-cliente" class="form-input" placeholder="Nombre del cliente"></div>
+            <div class="form-group"><label class="form-label">📱 Teléfono</label><input type="tel" id="credito-telefono" class="form-input" placeholder="04121234567"></div>
+            <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="credito-buscar" class="form-input" placeholder="Buscar producto..." oninput="filtrarProductos('credito')"></div>
+            <div class="product-list" id="credito-lista-productos"></div>
+            <div class="cart-container"><div class="cart-title">📋 Carrito (Crédito)</div><div id="credito-items"></div><div class="cart-total"><span>TOTAL:</span><span id="credito-total">Bs. 0,00</span></div></div>
+            <div class="btn-row">
+                <button class="btn-secondary btn-danger" onclick="vaciarCarrito('credito')">🗑️ Vaciar</button>
+                <button class="btn-primary" onclick="finalizarVenta('credito')">✅ Finalizar Crédito</button>
+            </div>
+        </div>
+
+        <!-- ACTUALIZAR INVENTARIO -->
+        <div class="screen" id="screen-actualizar">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">📦 Actualizar Inventario</h2>
+            <div class="sub-menu">
+                <button class="sub-btn" onclick="navigateTo('actualizar-existente')">📝 Producto Existente</button>
+                <button class="sub-btn" onclick="navigateTo('actualizar-nuevo')">➕ Producto Nuevo</button>
+                <button class="sub-btn" onclick="navigateTo('eliminar')" style="border-color:#EF4444;"><span style="color:#EF4444;">🗑️ Eliminar Producto</span></button>
+            </div>
+        </div>
+
+        <!-- ACTUALIZAR PRODUCTO EXISTENTE -->
+        <div class="screen" id="screen-actualizar-existente">
+            <button class="back-btn" onclick="navigateTo('actualizar')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">📝 Actualizar Producto Existente</h2>
+            <div class="form-group"><label class="form-label">Código del Producto</label><input type="text" id="act-existente-codigo" class="form-input" placeholder="Código"></div>
+            <div class="form-group"><label class="form-label">Cantidad a Agregar</label><input type="number" id="act-existente-cantidad" class="form-input" placeholder="Cantidad"></div>
+            <div class="form-group"><label class="form-label">Nuevo Precio Bs (dejar vacío si no cambia)</label><input type="number" id="act-existente-precio-bs" class="form-input" placeholder="Precio Bs" step="0.01"></div>
+            <button class="btn-primary btn-full" onclick="actualizarExistente()">💾 Guardar Cambios</button>
+        </div>
+
+        <!-- PRODUCTO NUEVO -->
+        <div class="screen" id="screen-actualizar-nuevo">
+            <button class="back-btn" onclick="navigateTo('actualizar')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">➕ Producto Nuevo</h2>
+            <div class="form-group"><label class="form-label">Nombre</label><input type="text" id="nuevo-nombre" class="form-input" placeholder="Nombre del producto"></div>
+            <div class="form-group"><label class="form-label">Código</label><input type="text" id="nuevo-codigo" class="form-input" placeholder="Código único"></div>
+            <div class="form-group"><label class="form-label">Cantidad Inicial</label><input type="number" id="nuevo-cantidad" class="form-input" placeholder="Stock inicial"></div>
+            <div class="form-group"><label class="form-label">Categoría</label><select id="nuevo-categoria" class="form-input"><option value="">Seleccionar categoría</option><option value="Bebidas">Bebidas</option><option value="Alimentos">Alimentos</option><option value="Granos">Granos</option><option value="Panaderia">Panadería</option><option value="Lacteos">Lácteos</option><option value="Limpieza">Limpieza</option><option value="Otros">Otros</option></select></div>
+            <div class="form-group"><label class="form-label">Precio Bs</label><input type="number" id="nuevo-precio-bs" class="form-input" placeholder="Precio en Bs" step="0.01"></div>
+            <button class="btn-primary btn-full" onclick="agregarNuevoProducto()">💾 Guardar Producto</button>
+        </div>
+
+        <!-- AJUSTAR TASA -->
+        <div class="screen" id="screen-ajustar">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">💲 Ajustar Tasa del Dólar</h2>
+            <div class="form-group"><label class="form-label">Nueva Tasa Bs/USD</label><input type="number" id="nueva-tasa" class="form-input" placeholder="Ej: 35,50" step="0.01"></div>
+            <button class="btn-primary btn-full" onclick="ajustarTasa()">💾 Guardar Tasa</button>
+        </div>
+
+        <!-- CATÁLOGO -->
+        <div class="screen" id="screen-catalogo">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">📖 Catálogo</h2>
+            <div id="catalogo-contenido"><div class="empty-state">Cargando...</div></div>
+        </div>
+
+        <!-- COBROS -->
+        <div class="screen" id="screen-cobros">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:
