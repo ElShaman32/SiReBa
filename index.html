@@ -526,32 +526,61 @@
             const ct = document.getElementById('cobros-contenido');
             ct.innerHTML = '<div class="empty-state">Cargando...</div>';
             try {
-                const snap = await db.collection('creditos').get();
+                const snap = await db.collection('creditos').where('estado', '==', 'pendiente').get();
                 const deu = []; 
                 snap.forEach(d => { 
-                    const data = d.data(); 
-                    if (data.pagado !== true) {
-                        deu.push({ 
-                            id: d.id, 
-                            cliente: data.cliente_nombre, 
-                            telefono: data.cliente_whatsapp, 
-                            deuda: data.total_bs, 
-                            fecha: data.fecha 
-                        }); 
-                    }
+                    const data = d.data();
+                    deu.push({ 
+                        id: d.id, 
+                        cliente: data.cliente_nombre,
+                        telefono: data.cliente_whatsapp,
+                        deuda: data.total_bs,
+                        deuda_usd: data.total_usd,
+                        fecha: data.fecha_credito
+                    }); 
                 });
                 if (!deu.length) { ct.innerHTML = '<div class="empty-state">🎉 No hay cuentas por cobrar</div>'; return; }
                 ct.innerHTML = deu.map(d =>
                     '<div class="product-item"><div class="product-info">' +
-                        '<div class="product-name">👤 ' + d.cliente + '</div>' +
+                        '<div class="product-name">👤 ' + (d.cliente || 'Sin nombre') + '</div>' +
                         '<div class="product-price" style="color:#F59E0B;">Debe: ' + M + ' ' + fV(d.deuda || 0) + '</div>' +
+                        (d.deuda_usd > 0 ? '<div class="product-price-usd">$' + Number(d.deuda_usd).toFixed(2) + '</div>' : '') +
                         '<div class="product-stock">📱 ' + (d.telefono || 'Sin teléfono') + '</div>' +
                     '</div>' +
                     '<button class="add-btn" style="background:#10B981;" onclick="sendCommand(\'/cobrar ' + (d.cliente || '').replace(/'/g, "\\'") + ' ' + (d.deuda || 0) + '\')">💰 Cobrar</button></div>'
                 ).join('');
-            } catch (e) { ct.innerHTML = '<div class="empty-state">Error: ' + e.message + '</div>'; }
+            } catch (e) { 
+                // Si falla where (índice no creado), cargar todos y filtrar manual
+                try {
+                    const snap2 = await db.collection('creditos').get();
+                    const deu2 = []; 
+                    snap2.forEach(d => { 
+                        const data = d.data();
+                        if (data.estado === 'pendiente') {
+                            deu2.push({ 
+                                id: d.id, 
+                                cliente: data.cliente_nombre,
+                                telefono: data.cliente_whatsapp,
+                                deuda: data.total_bs,
+                                deuda_usd: data.total_usd,
+                                fecha: data.fecha_credito
+                            }); 
+                        }
+                    });
+                    if (!deu2.length) { ct.innerHTML = '<div class="empty-state">🎉 No hay cuentas por cobrar</div>'; return; }
+                    ct.innerHTML = deu2.map(d =>
+                        '<div class="product-item"><div class="product-info">' +
+                            '<div class="product-name">👤 ' + (d.cliente || 'Sin nombre') + '</div>' +
+                            '<div class="product-price" style="color:#F59E0B;">Debe: ' + M + ' ' + fV(d.deuda || 0) + '</div>' +
+                            (d.deuda_usd > 0 ? '<div class="product-price-usd">$' + Number(d.deuda_usd).toFixed(2) + '</div>' : '') +
+                            '<div class="product-stock">📱 ' + (d.telefono || 'Sin teléfono') + '</div>' +
+                        '</div>' +
+                        '<button class="add-btn" style="background:#10B981;" onclick="sendCommand(\'/cobrar ' + (d.cliente || '').replace(/'/g, "\\'") + ' ' + (d.deuda || 0) + '\')">💰 Cobrar</button></div>'
+                    ).join('');
+                } catch (e2) { ct.innerHTML = '<div class="empty-state">Error: ' + e2.message + '</div>'; }
+            }
         }
-
+        
         function agregarProveedor() {
             const n = document.getElementById('prov-nombre').value.trim();
             if (!n) return alert('Nombre obligatorio');
