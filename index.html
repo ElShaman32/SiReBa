@@ -31,6 +31,7 @@
         .menu-btn .label { flex: 1; line-height: 1.2; }
         .menu-btn.full-width { grid-column: 1 / -1; }
         .menu-btn.highlight { background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(109,40,217,0.2)); border-color: #8B5CF6; }
+        .menu-btn.ayuda-btn { display: flex; justify-content: space-between; }
         .sub-menu { display: flex; flex-direction: column; gap: 10px; }
         .sub-btn { background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 14px; padding: 16px 18px; color: #fff; font-size: 15px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; }
         .sub-btn:active { background: #3a3a3a; border-color: #8B5CF6; transform: scale(0.98); }
@@ -60,6 +61,7 @@
         .product-info { flex: 1; }
         .product-name { font-weight: 600; font-size: 14px; }
         .product-price { font-size: 12px; color: #A78BFA; }
+        .product-price-usd { font-size: 10px; color: #888; }
         .product-stock { font-size: 11px; color: #888; }
         .add-btn { background: #8B5CF6; border: none; border-radius: 10px; padding: 8px 16px; color: #fff; font-weight: 600; cursor: pointer; font-size: 13px; }
         .add-btn:active { background: #6D28D9; }
@@ -80,6 +82,8 @@
         ::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 2px; }
         .empty-state { text-align: center; padding: 30px; color: #666; font-size: 14px; }
         .badge { display: inline-block; background: rgba(139,92,246,0.2); color: #A78BFA; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .ayuda-left { font-size: 20px; }
+        .ayuda-right { font-size: 20px; }
     </style>
 </head>
 <body>
@@ -108,8 +112,10 @@
                 <button class="menu-btn" onclick="navigateTo('ajustar')"><span class="icon">💲</span><span class="label">Ajustar Tasa</span></button>
                 <button class="menu-btn" onclick="navigateTo('catalogo')"><span class="icon">📖</span><span class="label">Catálogo</span></button>
                 <button class="menu-btn" onclick="navigateTo('cobros')"><span class="icon">🤑</span><span class="label">Cobros</span></button>
-                <button class="menu-btn full-width" onclick="navigateTo('proveedores')"><span class="icon">🏭</span><span class="label">Proveedores</span></button>
-                <button class="menu-btn full-width" onclick="navigateTo('ayuda')"><span class="icon">❓</span><span class="label">Ayuda</span></button>
+                <button class="menu-btn" onclick="navigateTo('proveedores')"><span class="icon">🏭</span><span class="label">Proveedores</span></button>
+                <button class="menu-btn full-width ayuda-btn" onclick="navigateTo('ayuda')">
+                    <span class="ayuda-left">❓</span><span class="label">Ayuda</span><span class="ayuda-right">🆘</span>
+                </button>
             </div>
             <div class="footer">Powered by SiReBa • n8n • Firebase</div>
         </div>
@@ -143,7 +149,7 @@
             <div class="form-group"><label class="form-label">📱 Teléfono</label><input type="tel" id="vender-telefono" class="form-input" placeholder="04121234567"></div>
             <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="vender-buscar" class="form-input" placeholder="Buscar producto..." oninput="filtrarProductos('vender')"></div>
             <div class="product-list" id="vender-lista-productos"></div>
-            <div class="cart-container"><div class="cart-title">📋 Carrito</div><div id="vender-items"></div><div class="cart-total"><span>TOTAL:</span><span id="vender-total">$0.00</span></div></div>
+            <div class="cart-container"><div class="cart-title">📋 Carrito</div><div id="vender-items"></div><div class="cart-total"><span>TOTAL:</span><span id="vender-total">Bs. 0,00</span></div></div>
             <div class="btn-row">
                 <button class="btn-secondary btn-danger" onclick="vaciarCarrito('vender')">🗑️ Vaciar</button>
                 <button class="btn-primary" onclick="finalizarVenta('contado')">✅ Finalizar Venta</button>
@@ -158,7 +164,7 @@
             <div class="form-group"><label class="form-label">📱 Teléfono</label><input type="tel" id="credito-telefono" class="form-input" placeholder="04121234567"></div>
             <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="credito-buscar" class="form-input" placeholder="Buscar producto..." oninput="filtrarProductos('credito')"></div>
             <div class="product-list" id="credito-lista-productos"></div>
-            <div class="cart-container"><div class="cart-title">📋 Carrito (Crédito)</div><div id="credito-items"></div><div class="cart-total"><span>TOTAL:</span><span id="credito-total">$0.00</span></div></div>
+            <div class="cart-container"><div class="cart-title">📋 Carrito (Crédito)</div><div id="credito-items"></div><div class="cart-total"><span>TOTAL:</span><span id="credito-total">Bs. 0,00</span></div></div>
             <div class="btn-row">
                 <button class="btn-secondary btn-danger" onclick="vaciarCarrito('credito')">🗑️ Vaciar</button>
                 <button class="btn-primary" onclick="finalizarVenta('credito')">✅ Finalizar Crédito</button>
@@ -180,9 +186,8 @@
         <div class="screen" id="screen-actualizar-existente">
             <button class="back-btn" onclick="navigateTo('actualizar')">← Volver</button>
             <h2 style="margin-bottom:16px;color:#A78BFA;">📝 Actualizar Producto Existente</h2>
-            <div class="form-group"><label class="form-label">Código del Producto</label><input type="text" id="act-existente-codigo" class="form-input" placeholder="Ej: CAF001"></div>
+            <div class="form-group"><label class="form-label">Código del Producto</label><input type="text" id="act-existente-codigo" class="form-input" placeholder="Código"></div>
             <div class="form-group"><label class="form-label">Cantidad a Agregar</label><input type="number" id="act-existente-cantidad" class="form-input" placeholder="Cantidad"></div>
-            <div class="form-group"><label class="form-label">Nuevo Precio USD (dejar vacío si no cambia)</label><input type="number" id="act-existente-precio-usd" class="form-input" placeholder="Precio USD" step="0.01"></div>
             <div class="form-group"><label class="form-label">Nuevo Precio Bs (dejar vacío si no cambia)</label><input type="number" id="act-existente-precio-bs" class="form-input" placeholder="Precio Bs" step="0.01"></div>
             <button class="btn-primary btn-full" onclick="actualizarExistente()">💾 Guardar Cambios</button>
         </div>
@@ -195,7 +200,6 @@
             <div class="form-group"><label class="form-label">Código</label><input type="text" id="nuevo-codigo" class="form-input" placeholder="Código único"></div>
             <div class="form-group"><label class="form-label">Cantidad Inicial</label><input type="number" id="nuevo-cantidad" class="form-input" placeholder="Stock inicial"></div>
             <div class="form-group"><label class="form-label">Categoría</label><select id="nuevo-categoria" class="form-input"><option value="">Seleccionar categoría</option><option value="Bebidas">Bebidas</option><option value="Alimentos">Alimentos</option><option value="Granos">Granos</option><option value="Panaderia">Panadería</option><option value="Lacteos">Lácteos</option><option value="Limpieza">Limpieza</option><option value="Otros">Otros</option></select></div>
-            <div class="form-group"><label class="form-label">Precio USD</label><input type="number" id="nuevo-precio-usd" class="form-input" placeholder="Precio en USD" step="0.01"></div>
             <div class="form-group"><label class="form-label">Precio Bs</label><input type="number" id="nuevo-precio-bs" class="form-input" placeholder="Precio en Bs" step="0.01"></div>
             <button class="btn-primary btn-full" onclick="agregarNuevoProducto()">💾 Guardar Producto</button>
         </div>
@@ -270,7 +274,7 @@
         <!-- AYUDA -->
         <div class="screen" id="screen-ayuda">
             <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
-            <h2 style="margin-bottom:16px;color:#A78BFA;">❓ Ayuda</h2>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">❓ Ayuda 🆘</h2>
             <div class="sub-menu">
                 <div class="sub-btn" style="cursor:default;border-color:transparent;"><span>📊</span> <small>Reporte: ver ventas por período</small></div>
                 <div class="sub-btn" style="cursor:default;border-color:transparent;"><span>🛒</span> <small>Vender: registrar venta al contado</small></div>
@@ -322,8 +326,8 @@
         
         const user = tg.initDataUnsafe.user;
         if (user) {
-            document.getElementById('userName').textContent = `👤 ${user.first_name} ${user.last_name || ''}`;
-            document.getElementById('userId').textContent = `ID: ${user.id}`;
+            document.getElementById('userName').textContent = '👤 ' + user.first_name + (user.last_name ? ' ' + user.last_name : '');
+            document.getElementById('userId').textContent = 'ID: ' + user.id;
             document.getElementById('userAvatar').textContent = user.first_name.charAt(0);
         }
         
@@ -364,17 +368,21 @@
             if (!lista) return;
             if (productos.length === 0) { lista.innerHTML = '<div class="empty-state">No hay productos disponibles</div>'; return; }
             lista.innerHTML = productos.map(p => {
-                const precio = p.precio_usd ? '$' + p.precio_usd.toFixed(2) : (p.precio_bs ? 'Bs. ' + p.precio_bs.toFixed(2) : 'N/A');
-                const precioValor = p.precio_usd || p.precio_bs || 0;
-                return `<div class="product-item">
-                    <div class="product-info">
-                        <div class="product-name">${p.nombre || p.id}</div>
-                        <div class="product-price">${precio}</div>
-                        <div class="product-stock">Stock: ${p.stock || p.cantidad || 0} | ${p.codigo || ''}</div>
-                    </div>
-                    <input type="number" class="qty-input" id="qty-${modo}-${p.id}" placeholder="Cant" min="1" value="1" style="width:55px;">
-                    <button class="add-btn" onclick="agregarAlCarrito('${modo}', '${p.id}', '${(p.nombre || p.id).replace(/'/g, "\\'")}', ${precioValor}, ${p.precio_bs || 0})">➕</button>
-                </div>`;
+                const precioBs = p.precio_bs || 0;
+                const precioUsd = p.precio_usd || 0;
+                const precioMostrar = 'Bs. ' + Number(precioBs).toFixed(2);
+                const precioUsdMostrar = precioUsd > 0 ? ' | $' + Number(precioUsd).toFixed(2) : '';
+                const nombreSeguro = (p.nombre || p.id || '').replace(/'/g, "\\'");
+                return '<div class="product-item">' +
+                    '<div class="product-info">' +
+                        '<div class="product-name">' + (p.nombre || p.id) + '</div>' +
+                        '<div class="product-price">' + precioMostrar + '</div>' +
+                        (precioUsd > 0 ? '<div class="product-price-usd">$' + Number(precioUsd).toFixed(2) + '</div>' : '') +
+                        '<div class="product-stock">Stock: ' + (p.stock || p.cantidad || 0) + ' | ' + (p.codigo || '') + '</div>' +
+                    '</div>' +
+                    '<input type="number" class="qty-input" id="qty-' + modo + '-' + p.id + '" placeholder="Cant" min="1" value="1" style="width:55px;">' +
+                    '<button class="add-btn" onclick="agregarAlCarrito(\'' + modo + '\', \'' + p.id + '\', \'' + nombreSeguro + '\', ' + precioBs + ', ' + precioUsd + ')">➕</button>' +
+                '</div>';
             }).join('');
         }
         
@@ -385,13 +393,13 @@
         }
         
         // ============ CARRITO ============
-        function agregarAlCarrito(modo, id, nombre, precioUsd, precioBs) {
+        function agregarAlCarrito(modo, id, nombre, precioBs, precioUsd) {
             const qtyInput = document.getElementById('qty-' + modo + '-' + id);
             const cantidad = parseInt(qtyInput?.value) || 1;
             const carrito = modo === 'vender' ? carritoVender : carritoCredito;
             const existente = carrito.find(item => item.id === id);
             if (existente) { existente.cantidad += cantidad; }
-            else { carrito.push({ id, nombre, precio_usd: precioUsd, precio_bs: precioBs, cantidad }); }
+            else { carrito.push({ id, nombre, precio_bs: precioBs, precio_usd: precioUsd, cantidad }); }
             actualizarCarrito(modo);
             tg.HapticFeedback.impactOccurred('light');
         }
@@ -402,16 +410,16 @@
             const totalSpan = document.getElementById(modo + '-total');
             if (carrito.length === 0) {
                 itemsContainer.innerHTML = '<div class="empty-state" style="padding:10px;font-size:13px;">Carrito vacío</div>';
-                totalSpan.textContent = '$0.00'; return;
+                totalSpan.textContent = 'Bs. 0,00'; return;
             }
-            let totalUsd = 0;
+            let totalBs = 0;
             itemsContainer.innerHTML = carrito.map((item, index) => {
-                const subtotal = item.precio_usd ? item.precio_usd * item.cantidad : 0;
-                totalUsd += subtotal;
-                const precioMostrar = item.precio_usd ? '$' + subtotal.toFixed(2) : 'Bs. ' + (item.precio_bs * item.cantidad).toFixed(2);
-                return `<div class="cart-item"><span>${item.nombre} x${item.cantidad}</span><span>${precioMostrar} <small style="color:#EF4444;cursor:pointer;margin-left:6px;" onclick="eliminarDelCarrito('${modo}', ${index})">✕</small></span></div>`;
+                const subtotal = (item.precio_bs || 0) * item.cantidad;
+                totalBs += subtotal;
+                const precioMostrar = 'Bs. ' + subtotal.toFixed(2);
+                return '<div class="cart-item"><span>' + item.nombre + ' x' + item.cantidad + '</span><span>' + precioMostrar + ' <small style="color:#EF4444;cursor:pointer;margin-left:6px;" onclick="eliminarDelCarrito(\'' + modo + '\', ' + index + ')">✕</small></span></div>';
             }).join('');
-            totalSpan.textContent = totalUsd > 0 ? '$' + totalUsd.toFixed(2) : 'Bs. ' + carrito.reduce((s, i) => s + (i.precio_bs * i.cantidad), 0).toFixed(2);
+            totalSpan.textContent = 'Bs. ' + totalBs.toFixed(2);
         }
         
         function eliminarDelCarrito(modo, index) {
@@ -439,18 +447,18 @@
             if (telefono) comando += ' ' + telefono;
             carrito.forEach(item => { comando += ' ' + item.id + ' ' + item.cantidad; });
             
-            const totalUsd = carrito.reduce((sum, item) => sum + ((item.precio_usd || 0) * item.cantidad), 0);
             const totalBs = carrito.reduce((sum, item) => sum + ((item.precio_bs || 0) * item.cantidad), 0);
+            const totalUsd = carrito.reduce((sum, item) => sum + ((item.precio_usd || 0) * item.cantidad), 0);
             
             db.collection('ventas').add({
                 fecha: new Date(), cliente, telefono,
-                productos: carrito.map(i => ({ nombre: i.nombre, cantidad: i.cantidad, precio_usd: i.precio_usd, precio_bs: i.precio_bs })),
-                total_usd: totalUsd, total_bs: totalBs, tipo, rif: '291092270890'
+                productos: carrito.map(i => ({ nombre: i.nombre, cantidad: i.cantidad, precio_bs: i.precio_bs, precio_usd: i.precio_usd })),
+                total_bs: totalBs, total_usd: totalUsd, tipo, rif: '291092270890'
             });
             
             db.collection('clientes').add({ nombre, telefono, ultimaCompra: new Date() });
             
-            mostrarTicket({ cliente, telefono, productos: carrito, total_usd: totalUsd, total_bs: totalBs, tipo: tipo === 'contado' ? 'VENTA AL CONTADO' : 'VENTA A CRÉDITO' });
+            mostrarTicket({ cliente, telefono, productos: carrito, total_bs: totalBs, total_usd: totalUsd, tipo: tipo === 'contado' ? 'VENTA AL CONTADO' : 'VENTA A CRÉDITO' });
             
             tg.sendData(comando);
             if (tipo === 'contado') carritoVender = []; else carritoCredito = [];
@@ -463,34 +471,30 @@
             const fecha = ahora.toLocaleDateString('es-VE');
             const hora = ahora.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
             
-            document.getElementById('ticket-contenido').innerHTML = `
-                <div class="ticket-header">
-                    <div class="ticket-logo">SB</div>
-                    <div class="ticket-business">SiReBa</div>
-                    <div class="ticket-rif">RIF: 291092270890</div>
-                    <small style="color:#888;">Tu tienda de confianza</small>
-                </div>
-                <hr class="ticket-divider">
-                <div class="ticket-row"><span>Fecha:</span><span>${fecha}</span></div>
-                <div class="ticket-row"><span>Hora:</span><span>${hora}</span></div>
-                <hr class="ticket-divider">
-                <div class="ticket-row"><span>Cliente:</span><span>${data.cliente}</span></div>
-                ${data.telefono ? `<div class="ticket-row"><span>Tel:</span><span>${data.telefono}</span></div>` : ''}
-                <div class="ticket-row"><span>Tipo:</span><span>${data.tipo}</span></div>
-                <hr class="ticket-divider">
-                <div style="font-size:12px;font-weight:600;color:#888;margin-bottom:6px;">PRODUCTOS</div>
-                ${data.productos.map(p => `
-                    <div class="ticket-row">
-                        <span>${p.nombre} x${p.cantidad}</span>
-                        <span>${p.precio_usd ? '$' + (p.precio_usd * p.cantidad).toFixed(2) : 'Bs. ' + (p.precio_bs * p.cantidad).toFixed(2)}</span>
-                    </div>
-                `).join('')}
-                <hr class="ticket-divider">
-                ${data.total_usd > 0 ? `<div class="ticket-row total"><span>TOTAL USD:</span><span>$${data.total_usd.toFixed(2)}</span></div>` : ''}
-                ${data.total_bs > 0 ? `<div class="ticket-row total"><span>TOTAL Bs:</span><span>Bs. ${data.total_bs.toFixed(2)}</span></div>` : ''}
-                <hr class="ticket-divider">
-                <div style="text-align:center;color:#A78BFA;font-size:13px;margin-top:8px;">¡Gracias por tu compra!</div>
-            `;
+            document.getElementById('ticket-contenido').innerHTML =
+                '<div class="ticket-header">' +
+                    '<div class="ticket-logo">SB</div>' +
+                    '<div class="ticket-business">SiReBa</div>' +
+                    '<div class="ticket-rif">RIF: 291092270890</div>' +
+                    '<small style="color:#888;">Tu tienda de confianza</small>' +
+                '</div>' +
+                '<hr class="ticket-divider">' +
+                '<div class="ticket-row"><span>Fecha:</span><span>' + fecha + '</span></div>' +
+                '<div class="ticket-row"><span>Hora:</span><span>' + hora + '</span></div>' +
+                '<hr class="ticket-divider">' +
+                '<div class="ticket-row"><span>Cliente:</span><span>' + data.cliente + '</span></div>' +
+                (data.telefono ? '<div class="ticket-row"><span>Tel:</span><span>' + data.telefono + '</span></div>' : '') +
+                '<div class="ticket-row"><span>Tipo:</span><span>' + data.tipo + '</span></div>' +
+                '<hr class="ticket-divider">' +
+                '<div style="font-size:12px;font-weight:600;color:#888;margin-bottom:6px;">PRODUCTOS</div>' +
+                data.productos.map(p =>
+                    '<div class="ticket-row"><span>' + p.nombre + ' x' + p.cantidad + '</span><span>Bs. ' + ((p.precio_bs || 0) * p.cantidad).toFixed(2) + '</span></div>'
+                ).join('') +
+                '<hr class="ticket-divider">' +
+                '<div class="ticket-row total"><span>TOTAL Bs:</span><span>Bs. ' + data.total_bs.toFixed(2) + '</span></div>' +
+                (data.total_usd > 0 ? '<div class="ticket-row" style="font-size:12px;color:#888;"><span>TOTAL USD:</span><span>$' + data.total_usd.toFixed(2) + '</span></div>' : '') +
+                '<hr class="ticket-divider">' +
+                '<div style="text-align:center;color:#A78BFA;font-size:13px;margin-top:8px;">¡Gracias por tu compra!</div>';
         }
         
         function compartirTicket() {
@@ -511,11 +515,10 @@
         function actualizarExistente() {
             const codigo = document.getElementById('act-existente-codigo').value.trim();
             const cantidad = document.getElementById('act-existente-cantidad').value.trim();
-            const precioUsd = document.getElementById('act-existente-precio-usd').value.trim();
             const precioBs = document.getElementById('act-existente-precio-bs').value.trim();
             if (!codigo || !cantidad) { alert('Código y cantidad son obligatorios'); return; }
             let comando = '/actualizar ' + codigo + ' ' + cantidad;
-            if (precioUsd || precioBs) comando += ' ' + (precioUsd || '0') + ' ' + (precioBs || '0');
+            if (precioBs) comando += ' ' + precioBs;
             sendCommand(comando);
         }
         
@@ -524,13 +527,11 @@
             const codigo = document.getElementById('nuevo-codigo').value.trim();
             const cantidad = document.getElementById('nuevo-cantidad').value.trim();
             const categoria = document.getElementById('nuevo-categoria').value;
-            const precioUsd = document.getElementById('nuevo-precio-usd').value.trim();
             const precioBs = document.getElementById('nuevo-precio-bs').value.trim();
-            if (!nombre || !codigo || !cantidad || !categoria || (!precioUsd && !precioBs)) {
-                alert('Todos los campos son obligatorios (al menos un precio)'); return;
+            if (!nombre || !codigo || !cantidad || !categoria || !precioBs) {
+                alert('Todos los campos son obligatorios (incluyendo Precio Bs)'); return;
             }
-            let comando = '/actualizar nuevo ' + nombre + ' ' + codigo + ' ' + cantidad + ' ' + categoria;
-            comando += ' ' + (precioUsd || '0') + ' ' + (precioBs || '0');
+            let comando = '/actualizar nuevo ' + nombre + ' ' + codigo + ' ' + cantidad + ' ' + categoria + ' ' + precioBs;
             sendCommand(comando);
         }
         
@@ -552,16 +553,16 @@
                 const snapshot = await db.collection('productos').get();
                 const productos = []; snapshot.forEach(doc => productos.push({ id: doc.id, ...doc.data() }));
                 if (productos.length === 0) { contenedor.innerHTML = '<div class="empty-state">No hay productos en el inventario</div>'; return; }
-                contenedor.innerHTML = productos.map(p => `
-                    <div class="product-item">
-                        <div class="product-info">
-                            <div class="product-name">${p.nombre || p.id}</div>
-                            <div class="product-price">${p.precio_usd ? '$' + p.precio_usd.toFixed(2) + ' | ' : ''}${p.precio_bs ? 'Bs. ' + p.precio_bs.toFixed(2) : ''}</div>
-                            <div class="product-stock">Stock: ${p.stock || p.cantidad || 0} | Código: ${p.codigo || 'N/A'}</div>
-                            <span class="badge">${p.categoria || 'Sin categoría'}</span>
-                        </div>
-                    </div>
-                `).join('');
+                contenedor.innerHTML = productos.map(p =>
+                    '<div class="product-item">' +
+                        '<div class="product-info">' +
+                            '<div class="product-name">' + (p.nombre || p.id) + '</div>' +
+                            '<div class="product-price">Bs. ' + (p.precio_bs || 0).toFixed(2) + (p.precio_usd ? ' | $' + p.precio_usd.toFixed(2) : '') + '</div>' +
+                            '<div class="product-stock">Stock: ' + (p.stock || p.cantidad || 0) + ' | Código: ' + (p.codigo || 'N/A') + '</div>' +
+                            '<span class="badge">' + (p.categoria || 'Sin categoría') + '</span>' +
+                        '</div>' +
+                    '</div>'
+                ).join('');
             } catch (error) { contenedor.innerHTML = '<div class="empty-state">Error al cargar el catálogo</div>'; }
         }
         
@@ -573,16 +574,16 @@
                 const snapshot = await db.collection('clientes').where('deuda', '>', 0).get();
                 const deudores = []; snapshot.forEach(doc => deudores.push({ id: doc.id, ...doc.data() }));
                 if (deudores.length === 0) { contenedor.innerHTML = '<div class="empty-state">🎉 No hay cuentas por cobrar</div>'; return; }
-                contenedor.innerHTML = deudores.map(d => `
-                    <div class="product-item">
-                        <div class="product-info">
-                            <div class="product-name">👤 ${d.nombre}</div>
-                            <div class="product-price" style="color:#F59E0B;">Debe: $${d.deuda?.toFixed(2)}</div>
-                            <div class="product-stock">📱 ${d.telefono || 'Sin teléfono'}</div>
-                        </div>
-                        <button class="add-btn" style="background:#10B981;" onclick="sendCommand('/cobrar ${d.nombre} ${d.deuda}')">💰 Cobrar</button>
-                    </div>
-                `).join('');
+                contenedor.innerHTML = deudores.map(d =>
+                    '<div class="product-item">' +
+                        '<div class="product-info">' +
+                            '<div class="product-name">👤 ' + d.nombre + '</div>' +
+                            '<div class="product-price" style="color:#F59E0B;">Debe: Bs. ' + (d.deuda || 0).toFixed(2) + '</div>' +
+                            '<div class="product-stock">📱 ' + (d.telefono || 'Sin teléfono') + '</div>' +
+                        '</div>' +
+                        '<button class="add-btn" style="background:#10B981;" onclick="sendCommand(\'/cobrar ' + (d.nombre || '').replace(/'/g, "\\'") + ' ' + (d.deuda || 0) + '\')">💰 Cobrar</button>' +
+                    '</div>'
+                ).join('');
             } catch (error) { contenedor.innerHTML = '<div class="empty-state">Error al cargar cobros</div>'; }
         }
         
@@ -605,7 +606,7 @@
                 const snapshot = await db.collection('proveedores').get();
                 const proveedores = []; snapshot.forEach(doc => proveedores.push({ id: doc.id, ...doc.data() }));
                 if (proveedores.length === 0) { contenedor.innerHTML = '<div class="empty-state">No hay proveedores registrados</div>'; return; }
-                contenedor.innerHTML = `<div class="search-box"><span class="search-icon">🔍</span><input type="text" class="form-input" placeholder="Buscar proveedor..." id="prov-mod-buscar"></div><div id="proveedor-modificar-lista">${proveedores.map(p => `<div class="product-item"><div class="product-info"><div class="product-name">${p.nombre}</div><div class="product-stock">📱 ${p.telefono || 'N/A'} | ✉️ ${p.correo || 'N/A'}</div></div><button class="add-btn" onclick="sendCommand('/proveedor modificar ${p.id}')">✏️</button></div>`).join('')}</div>`;
+                contenedor.innerHTML = '<div class="search-box"><span class="search-icon">🔍</span><input type="text" class="form-input" placeholder="Buscar proveedor..." id="prov-mod-buscar"></div><div id="proveedor-modificar-lista">' + proveedores.map(p => '<div class="product-item"><div class="product-info"><div class="product-name">' + p.nombre + '</div><div class="product-stock">📱 ' + (p.telefono || 'N/A') + ' | ✉️ ' + (p.correo || 'N/A') + '</div></div><button class="add-btn" onclick="sendCommand(\'/proveedor modificar ' + p.id + '\')">✏️</button></div>').join('') + '</div>';
             } catch (error) { contenedor.innerHTML = '<div class="empty-state">Error al cargar proveedores</div>'; }
         }
         
@@ -615,7 +616,7 @@
                 const snapshot = await db.collection('proveedores').get();
                 const proveedores = []; snapshot.forEach(doc => proveedores.push({ id: doc.id, ...doc.data() }));
                 if (proveedores.length === 0) { contenedor.innerHTML = '<div class="empty-state">No hay proveedores registrados</div>'; return; }
-                contenedor.innerHTML = proveedores.map(p => `<div class="product-item"><div class="product-info"><div class="product-name">${p.nombre}</div></div><button class="add-btn" style="background:#EF4444;" onclick="if(confirm('¿Eliminar ${p.nombre}?')){ eliminarProveedor('${p.id}') }">🗑️</button></div>`).join('');
+                contenedor.innerHTML = proveedores.map(p => '<div class="product-item"><div class="product-info"><div class="product-name">' + p.nombre + '</div></div><button class="add-btn" style="background:#EF4444;" onclick="if(confirm(\'¿Eliminar ' + (p.nombre || '').replace(/'/g, "\\'") + '?\')){ eliminarProveedor(\'' + p.id + '\') }">🗑️</button></div>').join('');
             } catch (error) { contenedor.innerHTML = '<div class="empty-state">Error al cargar proveedores</div>'; }
         }
         
@@ -631,7 +632,7 @@
             try {
                 const snapshot = await db.collection('productos').get();
                 const productos = []; snapshot.forEach(doc => productos.push({ id: doc.id, ...doc.data() }));
-                lista.innerHTML = productos.map(p => `<div class="product-item"><div class="product-info"><div class="product-name">${p.nombre || p.id}</div><div class="product-stock">Código: ${p.codigo || 'N/A'}</div></div><button class="add-btn" style="background:#EF4444;" onclick="if(confirm('¿Eliminar ${(p.nombre || p.id).replace(/'/g, "\\'")}?')){ eliminarProducto('${p.id}') }">🗑️</button></div>`).join('');
+                lista.innerHTML = productos.map(p => '<div class="product-item"><div class="product-info"><div class="product-name">' + (p.nombre || p.id) + '</div><div class="product-stock">Código: ' + (p.codigo || 'N/A') + '</div></div><button class="add-btn" style="background:#EF4444;" onclick="if(confirm(\'¿Eliminar ' + (p.nombre || p.id).replace(/'/g, "\\'") + '?\')){ eliminarProducto(\'' + p.id + '\') }">🗑️</button></div>').join('');
             } catch (error) { lista.innerHTML = '<div class="empty-state">Error al cargar productos</div>'; }
         }
         
