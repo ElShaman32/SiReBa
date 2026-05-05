@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ReveSiA</title>
+    <title>SiReBa POS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -17,195 +19,1504 @@
             background: #1a1a1a;
             color: #ffffff;
             min-height: 100vh;
-            padding: 20px;
+            padding: 16px;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
         
+        .app-container {
+            max-width: 420px;
+            margin: 0 auto;
+        }
+        
+        /* HEADER */
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            padding: 20px 0;
+            margin-bottom: 10px;
         }
         
-        .logo-placeholder {
-            width: 80px;
-            height: 80px;
+        .logo-container {
+            width: 70px;
+            height: 70px;
             background: linear-gradient(135deg, #8B5CF6, #6D28D9);
-            border-radius: 20px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            margin: 0 auto 12px;
+            font-size: 24px;
             font-weight: bold;
-            margin: 0 auto 15px;
             box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
         }
         
         .business-name {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: bold;
             background: linear-gradient(135deg, #8B5CF6, #A78BFA);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 20px;
+            margin-bottom: 4px;
         }
         
+        .business-rif {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* USER INFO */
         .user-info {
             background: #2a2a2a;
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 25px;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 20px;
             border: 1px solid #3a3a3a;
-        }
-        
-        .user-greeting {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #A78BFA;
-        }
-        
-        .user-id {
-            font-size: 14px;
-            color: #888;
-        }
-        
-        .buttons-container {
             display: flex;
-            flex-direction: column;
+            align-items: center;
             gap: 12px;
         }
         
-        .menu-button {
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            padding: 16px 20px;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .user-details {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .user-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        
+        .user-id {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .user-role {
+            font-size: 11px;
+            color: #A78BFA;
+        }
+        
+        /* PANTALLAS */
+        .screen {
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* BOTONES PRINCIPALES */
+        .main-menu {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .menu-btn {
             background: #2a2a2a;
             border: 1px solid #3a3a3a;
-            border-radius: 15px;
+            border-radius: 14px;
+            padding: 18px 14px;
             color: #ffffff;
-            font-size: 16px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-align: left;
+            width: 100%;
         }
         
-        .menu-button:hover {
+        .menu-btn:active {
             background: #3a3a3a;
             border-color: #8B5CF6;
-            transform: translateX(5px);
+            transform: scale(0.97);
         }
         
-        .menu-button:active {
-            background: #8B5CF6;
+        .menu-btn .icon {
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        
+        .menu-btn .label {
+            flex: 1;
+            line-height: 1.2;
+        }
+        
+        .menu-btn.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .menu-btn.highlight {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(109, 40, 217, 0.2));
+            border-color: #8B5CF6;
+        }
+        
+        /* BOTONES VERTICALES (sub-menús) */
+        .sub-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .sub-btn {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 14px;
+            padding: 16px 18px;
+            color: #ffffff;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .sub-btn:active {
+            background: #3a3a3a;
             border-color: #8B5CF6;
             transform: scale(0.98);
         }
         
-        .button-icon {
-            font-size: 24px;
-            margin-right: 15px;
-            width: 30px;
-            text-align: center;
+        /* FORMULARIOS */
+        .form-group {
+            margin-bottom: 14px;
         }
         
-        .button-text {
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: #A78BFA;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 15px;
+            transition: all 0.2s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #8B5CF6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+        
+        .form-input::placeholder {
+            color: #666;
+        }
+        
+        select.form-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+        
+        /* BOTONES ACCIÓN */
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+        }
+        
+        .btn-primary {
+            flex: 1;
+            padding: 14px;
+            background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+            border: none;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.97);
+            opacity: 0.9;
+        }
+        
+        .btn-secondary {
+            flex: 1;
+            padding: 14px;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-secondary:active {
+            background: #3a3a3a;
+        }
+        
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #EF4444;
+            color: #EF4444;
+        }
+        
+        .btn-full {
+            width: 100%;
+            margin-top: 8px;
+        }
+        
+        /* CARRITO */
+        .cart-container {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 14px;
+            padding: 14px;
+            margin-top: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .cart-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #A78BFA;
+            margin-bottom: 10px;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #3a3a3a;
+            font-size: 14px;
+        }
+        
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #8B5CF6;
+            color: #A78BFA;
+        }
+        
+        /* BÚSQUEDA */
+        .search-box {
+            position: relative;
+            margin-bottom: 14px;
+        }
+        
+        .search-box .form-input {
+            padding-left: 44px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #888;
+        }
+        
+        /* LISTA DE PRODUCTOS */
+        .product-list {
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 14px;
+        }
+        
+        .product-item {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .product-info {
             flex: 1;
         }
         
-        .button-arrow {
-            color: #8B5CF6;
-            font-size: 20px;
+        .product-name {
+            font-weight: 600;
+            font-size: 14px;
         }
         
+        .product-price {
+            font-size: 12px;
+            color: #A78BFA;
+        }
+        
+        .product-stock {
+            font-size: 11px;
+            color: #888;
+        }
+        
+        .add-btn {
+            background: #8B5CF6;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 16px;
+            color: #ffffff;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .add-btn:active {
+            background: #6D28D9;
+        }
+        
+        .qty-input {
+            width: 50px;
+            padding: 8px;
+            background: #1a1a1a;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            color: #ffffff;
+            text-align: center;
+            font-size: 13px;
+        }
+        
+        /* TICKET */
+        .ticket {
+            background: #2a2a2a;
+            border: 2px solid #8B5CF6;
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+        
+        .ticket-header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        
+        .ticket-logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-size: 18px;
+        }
+        
+        .ticket-business {
+            font-size: 18px;
+            font-weight: 700;
+            color: #A78BFA;
+        }
+        
+        .ticket-rif {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .ticket-divider {
+            border: none;
+            border-top: 1px dashed #3a3a3a;
+            margin: 12px 0;
+        }
+        
+        .ticket-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin: 4px 0;
+        }
+        
+        .ticket-row.total {
+            font-size: 16px;
+            font-weight: 700;
+            color: #A78BFA;
+            margin-top: 8px;
+        }
+        
+        /* BACK BUTTON */
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 8px 0;
+            margin-bottom: 14px;
+        }
+        
+        .back-btn:active {
+            color: #A78BFA;
+        }
+        
+        /* FOOTER */
         .footer {
             text-align: center;
-            margin-top: 30px;
+            margin-top: 20px;
+            color: #555;
+            font-size: 11px;
+        }
+        
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #3a3a3a;
+            border-radius: 2px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px;
             color: #666;
-            font-size: 12px;
+            font-size: 14px;
+        }
+        
+        .highlight-text {
+            color: #A78BFA;
+            font-weight: 600;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: rgba(139, 92, 246, 0.2);
+            color: #A78BFA;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .alert {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid #F59E0B;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 13px;
+            color: #F59E0B;
+            margin-bottom: 14px;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo-placeholder">RV</div>
-        <div class="business-name">ReveSiA</div>
-    </div>
-    
-    <div class="user-info">
-        <div class="user-greeting" id="userGreeting">👤 Cargando...</div>
-        <div class="user-id" id="userId">Obteniendo información...</div>
-    </div>
-    
-    <div class="buttons-container">
-        <button class="menu-button" onclick="sendCommand('/reporte')">
-            <span class="button-icon">📊</span>
-            <span class="button-text">Reporte De Ventas</span>
-            <span class="button-arrow">›</span>
-        </button>
+    <div class="app-container">
         
-        <button class="menu-button" onclick="sendCommand('/vender')">
-            <span class="button-icon">💰</span>
-            <span class="button-text">Vendido</span>
-            <span class="button-arrow">›</span>
-        </button>
+        <!-- ============ PANTALLA PRINCIPAL ============ -->
+        <div class="screen active" id="screen-main">
+            <div class="header">
+                <div class="logo-container">SB</div>
+                <div class="business-name">SiReBa</div>
+                <div class="business-rif">RIF: 291092270890</div>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">👤</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">Cargando...</div>
+                    <div class="user-id" id="userId">ID: ---</div>
+                    <div class="user-role">Administrador</div>
+                </div>
+            </div>
+            
+            <div class="main-menu">
+                <button class="menu-btn" onclick="navigateTo('reporte')">
+                    <span class="icon">📊</span>
+                    <span class="label">Reporte De Ventas</span>
+                </button>
+                
+                <button class="menu-btn highlight" onclick="navigateTo('vender')">
+                    <span class="icon">🛒</span>
+                    <span class="label">Vender</span>
+                </button>
+                
+                <button class="menu-btn highlight" onclick="navigateTo('credito')">
+                    <span class="icon">💰</span>
+                    <span class="label">Crédito</span>
+                </button>
+                
+                <button class="menu-btn" onclick="navigateTo('actualizar')">
+                    <span class="icon">📦</span>
+                    <span class="label">Actualizar Inventario</span>
+                </button>
+                
+                <button class="menu-btn" onclick="navigateTo('ajustar')">
+                    <span class="icon">💲</span>
+                    <span class="label">Ajustar Precio</span>
+                </button>
+                
+                <button class="menu-btn" onclick="navigateTo('catalogo')">
+                    <span class="icon">📖</span>
+                    <span class="label">Catálogo</span>
+                </button>
+                
+                <button class="menu-btn" onclick="navigateTo('cobros')">
+                    <span class="icon">🤑</span>
+                    <span class="label">Cobros</span>
+                </button>
+                
+                <button class="menu-btn" onclick="navigateTo('proveedores')">
+                    <span class="icon">🏭</span>
+                    <span class="label">Proveedores</span>
+                </button>
+                
+                <button class="menu-btn" onclick="navigateTo('eliminar')">
+                    <span class="icon">🗑️</span>
+                    <span class="label">Eliminar Producto</span>
+                </button>
+                
+                <button class="menu-btn full-width" onclick="navigateTo('ayuda')">
+                    <span class="icon">❓</span>
+                    <span class="label">Ayuda</span>
+                </button>
+            </div>
+            
+            <div class="footer">Powered by SiReBa • n8n • Firebase</div>
+        </div>
         
-        <button class="menu-button" onclick="sendCommand('/actualizar')">
-            <span class="button-icon">📦</span>
-            <span class="button-text">Actualizar Inventario</span>
-            <span class="button-arrow">›</span>
-        </button>
+        <!-- ============ PANTALLA REPORTE ============ -->
+        <div class="screen" id="screen-reporte">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">📊 Reporte De Ventas</h2>
+            <div class="sub-menu">
+                <button class="sub-btn" onclick="sendCommand('/reporte hoy')">
+                    <span>📅</span> Hoy
+                </button>
+                <button class="sub-btn" onclick="sendCommand('/reporte ayer')">
+                    <span>📆</span> Ayer
+                </button>
+                <button class="sub-btn" onclick="sendCommand('/reporte semana')">
+                    <span>📊</span> Esta Semana
+                </button>
+                <button class="sub-btn" onclick="navigateTo('reporte-personalizado')">
+                    <span>🗓️</span> Período Personalizado
+                </button>
+            </div>
+        </div>
         
-        <button class="menu-button" onclick="sendCommand('/ajustar')">
-            <span class="button-icon">💲</span>
-            <span class="button-text">Ajustar Precio</span>
-            <span class="button-arrow">›</span>
-        </button>
+        <!-- ============ PANTALLA REPORTE PERSONALIZADO ============ -->
+        <div class="screen" id="screen-reporte-personalizado">
+            <button class="back-btn" onclick="navigateTo('reporte')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">🗓️ Período Personalizado</h2>
+            <div class="form-group">
+                <label class="form-label">Desde</label>
+                <input type="date" id="fecha-desde" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Hasta</label>
+                <input type="date" id="fecha-hasta" class="form-input">
+            </div>
+            <button class="btn-primary btn-full" onclick="generarReportePersonalizado()">📊 Generar Reporte</button>
+        </div>
         
-        <button class="menu-button" onclick="sendCommand('/catalogo')">
-            <span class="button-icon">📖</span>
-            <span class="button-text">Catálogo</span>
-            <span class="button-arrow">›</span>
-        </button>
+        <!-- ============ PANTALLA VENDER ============ -->
+        <div class="screen" id="screen-vender">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">🛒 Vender</h2>
+            
+            <div class="form-group">
+                <label class="form-label">👤 Nombre del Cliente</label>
+                <input type="text" id="vender-cliente" class="form-input" placeholder="Nombre del cliente">
+            </div>
+            <div class="form-group">
+                <label class="form-label">📱 Teléfono</label>
+                <input type="tel" id="vender-telefono" class="form-input" placeholder="Ej: 04121234567">
+            </div>
+            
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="vender-buscar" class="form-input" placeholder="Buscar producto..." oninput="filtrarProductos('vender')">
+            </div>
+            
+            <div class="product-list" id="vender-lista-productos"></div>
+            
+            <div class="cart-container" id="vender-carrito">
+                <div class="cart-title">📋 Carrito</div>
+                <div id="vender-items"></div>
+                <div class="cart-total">
+                    <span>TOTAL:</span>
+                    <span id="vender-total">$0.00</span>
+                </div>
+            </div>
+            
+            <div class="btn-row">
+                <button class="btn-secondary btn-danger" onclick="vaciarCarrito('vender')">🗑️ Vaciar</button>
+                <button class="btn-primary" onclick="finalizarVenta('contado')">✅ Finalizar Venta</button>
+            </div>
+        </div>
         
-        <button class="menu-button" onclick="sendCommand('/ayuda')">
-            <span class="button-icon">❓</span>
-            <span class="button-text">Ayuda</span>
-            <span class="button-arrow">›</span>
-        </button>
-    </div>
-    
-    <div class="footer">
-        Powered by ReveSiA • n8n
+        <!-- ============ PANTALLA CRÉDITO ============ -->
+        <div class="screen" id="screen-credito">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">💰 Venta a Crédito</h2>
+            
+            <div class="form-group">
+                <label class="form-label">👤 Nombre del Cliente</label>
+                <input type="text" id="credito-cliente" class="form-input" placeholder="Nombre del cliente">
+            </div>
+            <div class="form-group">
+                <label class="form-label">📱 Teléfono</label>
+                <input type="tel" id="credito-telefono" class="form-input" placeholder="Ej: 04121234567">
+            </div>
+            
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="credito-buscar" class="form-input" placeholder="Buscar producto..." oninput="filtrarProductos('credito')">
+            </div>
+            
+            <div class="product-list" id="credito-lista-productos"></div>
+            
+            <div class="cart-container" id="credito-carrito">
+                <div class="cart-title">📋 Carrito (Crédito)</div>
+                <div id="credito-items"></div>
+                <div class="cart-total">
+                    <span>TOTAL:</span>
+                    <span id="credito-total">$0.00</span>
+                </div>
+            </div>
+            
+            <div class="btn-row">
+                <button class="btn-secondary btn-danger" onclick="vaciarCarrito('credito')">🗑️ Vaciar</button>
+                <button class="btn-primary" onclick="finalizarVenta('credito')">✅ Finalizar Crédito</button>
+            </div>
+        </div>
+        
+        <!-- ============ PANTALLA ACTUALIZAR INVENTARIO ============ -->
+        <div class="screen" id="screen-actualizar">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">📦 Actualizar Inventario</h2>
+            <div class="sub-menu">
+                <button class="sub-btn" onclick="navigateTo('actualizar-existente')">
+                    <span>📝</span> Producto Existente
+                </button>
+                <button class="sub-btn" onclick="navigateTo('actualizar-nuevo')">
+                    <span>➕</span> Producto Nuevo
+                </button>
+            </div>
+        </div>
+        
+        <!-- ============ ACTUALIZAR PRODUCTO EXISTENTE ============ -->
+        <div class="screen" id="screen-actualizar-existente">
+            <button class="back-btn" onclick="navigateTo('actualizar')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">📝 Actualizar Existente</h2>
+            <div class="form-group">
+                <label class="form-label">Código del Producto</label>
+                <input type="text" id="act-existente-codigo" class="form-input" placeholder="Ej: CAF001">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cantidad a Agregar</label>
+                <input type="number" id="act-existente-cantidad" class="form-input" placeholder="Cantidad">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nuevo Precio USD (dejar vacío si no cambia)</label>
+                <input type="number" id="act-existente-precio" class="form-input" placeholder="Precio USD" step="0.01">
+            </div>
+            <button class="btn-primary btn-full" onclick="actualizarExistente()">💾 Guardar Cambios</button>
+        </div>
+        
+        <!-- ============ PRODUCTO NUEVO ============ -->
+        <div class="screen" id="screen-actualizar-nuevo">
+            <button class="back-btn" onclick="navigateTo('actualizar')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">➕ Producto Nuevo</h2>
+            <div class="form-group">
+                <label class="form-label">Nombre</label>
+                <input type="text" id="nuevo-nombre" class="form-input" placeholder="Nombre del producto">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Código</label>
+                <input type="text" id="nuevo-codigo" class="form-input" placeholder="Código único">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cantidad Inicial</label>
+                <input type="number" id="nuevo-cantidad" class="form-input" placeholder="Stock inicial">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Categoría</label>
+                <select id="nuevo-categoria" class="form-input">
+                    <option value="">Seleccionar categoría</option>
+                    <option value="Bebidas">Bebidas</option>
+                    <option value="Alimentos">Alimentos</option>
+                    <option value="Granos">Granos</option>
+                    <option value="Panaderia">Panadería</option>
+                    <option value="Lacteos">Lácteos</option>
+                    <option value="Limpieza">Limpieza</option>
+                    <option value="Otros">Otros</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Precio USD</label>
+                <input type="number" id="nuevo-precio" class="form-input" placeholder="Precio en USD" step="0.01">
+            </div>
+            <button class="btn-primary btn-full" onclick="agregarNuevoProducto()">💾 Guardar Producto</button>
+        </div>
+        
+        <!-- ============ AJUSTAR PRECIO (TASA) ============ -->
+        <div class="screen" id="screen-ajustar">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">💲 Ajustar Tasa del Dólar</h2>
+            <div class="form-group">
+                <label class="form-label">Nueva Tasa Bs/USD</label>
+                <input type="number" id="nueva-tasa" class="form-input" placeholder="Ej: 35.50" step="0.01">
+            </div>
+            <button class="btn-primary btn-full" onclick="ajustarTasa()">💾 Guardar Tasa</button>
+        </div>
+        
+        <!-- ============ CATÁLOGO ============ -->
+        <div class="screen" id="screen-catalogo">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">📖 Catálogo</h2>
+            <div id="catalogo-contenido">
+                <div class="empty-state">Cargando productos...</div>
+            </div>
+        </div>
+        
+        <!-- ============ COBROS ============ -->
+        <div class="screen" id="screen-cobros">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">🤑 Cuentas por Cobrar</h2>
+            <div id="cobros-contenido">
+                <div class="empty-state">Cargando deudores...</div>
+            </div>
+        </div>
+        
+        <!-- ============ PROVEEDORES ============ -->
+        <div class="screen" id="screen-proveedores">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">🏭 Gestión Proveedores</h2>
+            <div class="sub-menu">
+                <button class="sub-btn" onclick="navigateTo('proveedor-agregar')">
+                    <span>➕</span> Agregar Proveedor
+                </button>
+                <button class="sub-btn" onclick="navigateTo('proveedor-modificar')">
+                    <span>✏️</span> Modificar Proveedor
+                </button>
+                <button class="sub-btn" onclick="navigateTo('proveedor-eliminar')">
+                    <span>🗑️</span> Eliminar Proveedor
+                </button>
+            </div>
+        </div>
+        
+        <!-- ============ AGREGAR PROVEEDOR ============ -->
+        <div class="screen" id="screen-proveedor-agregar">
+            <button class="back-btn" onclick="navigateTo('proveedores')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">➕ Agregar Proveedor</h2>
+            <div class="form-group">
+                <label class="form-label">Nombre</label>
+                <input type="text" id="prov-nombre" class="form-input" placeholder="Nombre del proveedor">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Teléfono</label>
+                <input type="tel" id="prov-telefono" class="form-input" placeholder="Teléfono">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Correo</label>
+                <input type="email" id="prov-correo" class="form-input" placeholder="Correo electrónico">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Productos que provee</label>
+                <input type="text" id="prov-productos" class="form-input" placeholder="Ej: Café, Carotas">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notas</label>
+                <input type="text" id="prov-notas" class="form-input" placeholder="Notas adicionales">
+            </div>
+            <button class="btn-primary btn-full" onclick="agregarProveedor()">💾 Guardar Proveedor</button>
+        </div>
+        
+        <!-- ============ MODIFICAR PROVEEDOR ============ -->
+        <div class="screen" id="screen-proveedor-modificar">
+            <button class="back-btn" onclick="navigateTo('proveedores')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">✏️ Modificar Proveedor</h2>
+            <div id="proveedor-modificar-contenido">
+                <div class="empty-state">Cargando proveedores...</div>
+            </div>
+        </div>
+        
+        <!-- ============ ELIMINAR PROVEEDOR ============ -->
+        <div class="screen" id="screen-proveedor-eliminar">
+            <button class="back-btn" onclick="navigateTo('proveedores')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">🗑️ Eliminar Proveedor</h2>
+            <div id="proveedor-eliminar-contenido">
+                <div class="empty-state">Cargando proveedores...</div>
+            </div>
+        </div>
+        
+        <!-- ============ ELIMINAR PRODUCTO ============ -->
+        <div class="screen" id="screen-eliminar">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">🗑️ Eliminar Producto</h2>
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="eliminar-buscar" class="form-input" placeholder="Buscar producto..." oninput="filtrarProductosEliminar()">
+            </div>
+            <div id="eliminar-lista"></div>
+        </div>
+        
+        <!-- ============ AYUDA ============ -->
+        <div class="screen" id="screen-ayuda">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver</button>
+            <h2 style="margin-bottom:16px;color:#A78BFA;">❓ Ayuda</h2>
+            <div class="sub-menu">
+                <div class="sub-btn" style="cursor:default;border-color:transparent;">
+                    <span>📊</span> <small>Reporte: ver ventas por período</small>
+                </div>
+                <div class="sub-btn" style="cursor:default;border-color:transparent;">
+                    <span>🛒</span> <small>Vender: registrar venta al contado</small>
+                </div>
+                <div class="sub-btn" style="cursor:default;border-color:transparent;">
+                    <span>💰</span> <small>Crédito: registrar venta a crédito</small>
+                </div>
+                <div class="sub-btn" style="cursor:default;border-color:transparent;">
+                    <span>📦</span> <small>Actualizar: modificar stock o crear producto</small>
+                </div>
+                <div class="sub-btn" style="cursor:default;border-color:transparent;">
+                    <span>💲</span> <small>Ajustar Precio: cambiar tasa del dólar</small>
+                </div>
+                <div class="sub-btn" style="cursor:default;border-color:transparent;">
+                    <span>📖</span> <small>Catálogo: ver inventario completo</small>
+                </div>
+                <div class="sub-btn" style="cursor:default;border-color:transparent;">
+                    <span>🤑</span> <small>Cobros: ver cuentas por cobrar</small>
+                </div>
+                <div class="sub-btn" style="cursor:default;border-color:transparent;">
+                    <span>🏭</span> <small>Proveedores: gestionar proveedores</small>
+                </div>
+                <div class="sub-btn" style="cursor:default;border-color:transparent;">
+                    <span>🗑️</span> <small>Eliminar: borrar producto del inventario</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ============ TICKET ============ -->
+        <div class="screen" id="screen-ticket">
+            <button class="back-btn" onclick="navigateTo('main')">← Volver al Inicio</button>
+            <div class="ticket" id="ticket-contenido"></div>
+            <div class="btn-row" style="margin-top:14px;">
+                <button class="btn-secondary" onclick="compartirTicket()">📤 Compartir</button>
+                <button class="btn-primary" onclick="navigateTo('main')">🏠 Inicio</button>
+            </div>
+        </div>
+        
     </div>
 
     <script>
-        // Inicializar Telegram Web App
+        // ============ CONFIGURACIÓN FIREBASE ============
+        const firebaseConfig = {
+            apiKey: "AIzaSyDiqM2oykoa-EkTJoFPQSdejjqRthdWxQY",
+            authDomain: "saas-universal-app.firebaseapp.com",
+            projectId: "saas-universal-app",
+            storageBucket: "saas-universal-app.firebasestorage.app",
+            messagingSenderId: "1058808192755",
+            appId: "1:1058808192755:web:a1ebeb9a3625f42cd56186"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // ============ DATOS GLOBALES ============
+        let carritoVender = [];
+        let carritoCredito = [];
+        let todosProductos = [];
+        let tasaActual = 35.50;
+        
+        // ============ TELEGRAM WEB APP ============
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
         
-        // Obtener datos del usuario
         const user = tg.initDataUnsafe.user;
-        
         if (user) {
-            // Personalizar con datos del usuario
-            const greeting = `👤 Bienvenido ${user.first_name}${user.last_name ? ' ' + user.last_name : ''}`;
-            document.getElementById('userGreeting').textContent = greeting;
+            document.getElementById('userName').textContent = `👤 ${user.first_name} ${user.last_name || ''}`;
             document.getElementById('userId').textContent = `ID: ${user.id}`;
-        } else {
-            document.getElementById('userGreeting').textContent = '👤 Bienvenido Usuario';
-            document.getElementById('userId').textContent = 'Sesión no detectada';
+            document.getElementById('userAvatar').textContent = user.first_name.charAt(0);
         }
         
-        // Aplicar colores del tema de Telegram
-        document.body.style.backgroundColor = tg.themeParams.bg_color || '#1a1a1a';
-        document.body.style.color = tg.themeParams.text_color || '#ffffff';
+        // ============ NAVEGACIÓN ============
+        function navigateTo(screenName) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById('screen-' + screenName);
+            if (target) {
+                target.classList.add('active');
+                window.scrollTo(0, 0);
+                
+                // Cargar datos al navegar
+                if (screenName === 'catalogo') cargarCatalogo();
+                if (screenName === 'cobros') cargarCobros();
+                if (screenName === 'proveedor-modificar') cargarProveedoresModificar();
+                if (screenName === 'proveedor-eliminar') cargarProveedoresEliminar();
+                if (screenName === 'vender') cargarProductos('vender');
+                if (screenName === 'credito') cargarProductos('credito');
+                if (screenName === 'eliminar') cargarProductosEliminar();
+            }
+        }
         
-        // Función para enviar comando
+        // ============ ENVIAR COMANDO AL CHAT ============
         function sendCommand(command) {
-            // Cerrar la Mini App y enviar el comando al chat
             tg.sendData(command);
             tg.close();
         }
+        
+        // ============ CARGAR PRODUCTOS DESDE FIREBASE ============
+        async function cargarProductos(modo) {
+            try {
+                const snapshot = await db.collection('productos').get();
+                todosProductos = [];
+                snapshot.forEach(doc => {
+                    todosProductos.push({ id: doc.id, ...doc.data() });
+                });
+                mostrarProductos(modo, todosProductos);
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+            }
+        }
+        
+        function mostrarProductos(modo, productos) {
+            const lista = document.getElementById(modo + '-lista-productos');
+            if (!lista) return;
+            
+            if (productos.length === 0) {
+                lista.innerHTML = '<div class="empty-state">No hay productos disponibles</div>';
+                return;
+            }
+            
+            lista.innerHTML = productos.map(p => `
+                <div class="product-item">
+                    <div class="product-info">
+                        <div class="product-name">${p.nombre}</div>
+                        <div class="product-price">$${p.precio?.toFixed(2)}</div>
+                        <div class="product-stock">Stock: ${p.stock || 0}</div>
+                    </div>
+                    <input type="number" class="qty-input" id="qty-${modo}-${p.id}" placeholder="Cant" min="1" value="1" style="width:55px;">
+                    <button class="add-btn" onclick="agregarAlCarrito('${modo}', '${p.id}', '${p.nombre}', ${p.precio})">➕</button>
+                </div>
+            `).join('');
+        }
+        
+        function filtrarProductos(modo) {
+            const busqueda = document.getElementById(modo + '-buscar').value.toLowerCase();
+            const filtrados = todosProductos.filter(p => 
+                p.nombre.toLowerCase().includes(busqueda) || 
+                (p.codigo && p.codigo.toLowerCase().includes(busqueda))
+            );
+            mostrarProductos(modo, filtrados);
+        }
+        
+        // ============ CARRITO ============
+        function agregarAlCarrito(modo, id, nombre, precio) {
+            const qtyInput = document.getElementById('qty-' + modo + '-' + id);
+            const cantidad = parseInt(qtyInput?.value) || 1;
+            
+            const carrito = modo === 'vender' ? carritoVender : carritoCredito;
+            const existente = carrito.find(item => item.id === id);
+            
+            if (existente) {
+                existente.cantidad += cantidad;
+            } else {
+                carrito.push({ id, nombre, precio, cantidad });
+            }
+            
+            actualizarCarrito(modo);
+            tg.HapticFeedback.impactOccurred('light');
+        }
+        
+        function actualizarCarrito(modo) {
+            const carrito = modo === 'vender' ? carritoVender : carritoCredito;
+            const itemsContainer = document.getElementById(modo + '-items');
+            const totalSpan = document.getElementById(modo + '-total');
+            
+            if (carrito.length === 0) {
+                itemsContainer.innerHTML = '<div class="empty-state" style="padding:10px;font-size:13px;">Carrito vacío</div>';
+                totalSpan.textContent = '$0.00';
+                return;
+            }
+            
+            let total = 0;
+            itemsContainer.innerHTML = carrito.map((item, index) => {
+                const subtotal = item.precio * item.cantidad;
+                total += subtotal;
+                return `
+                    <div class="cart-item">
+                        <span>${item.nombre} x${item.cantidad}</span>
+                        <span>$${subtotal.toFixed(2)} 
+                            <small style="color:#EF4444;cursor:pointer;margin-left:6px;" 
+                                  onclick="eliminarDelCarrito('${modo}', ${index})">✕</small>
+                        </span>
+                    </div>
+                `;
+            }).join('');
+            
+            totalSpan.textContent = '$' + total.toFixed(2);
+        }
+        
+        function eliminarDelCarrito(modo, index) {
+            const carrito = modo === 'vender' ? carritoVender : carritoCredito;
+            carrito.splice(index, 1);
+            actualizarCarrito(modo);
+        }
+        
+        function vaciarCarrito(modo) {
+            if (modo === 'vender') carritoVender = [];
+            else carritoCredito = [];
+            actualizarCarrito(modo);
+        }
+        
+        // ============ FINALIZAR VENTA ============
+        function finalizarVenta(tipo) {
+            const carrito = tipo === 'contado' ? carritoVender : carritoCredito;
+            const prefijo = tipo === 'contado' ? 'vender' : 'credito';
+            
+            const cliente = document.getElementById(prefijo + '-cliente').value.trim();
+            const telefono = document.getElementById(prefijo + '-telefono').value.trim();
+            
+            if (!cliente) {
+                alert('Por favor ingresa el nombre del cliente');
+                return;
+            }
+            if (carrito.length === 0) {
+                alert('El carrito está vacío');
+                return;
+            }
+            
+            // Construir comando para n8n
+            let comando = tipo === 'contado' ? '/vender' : '/credito';
+            comando += ' ' + cliente;
+            if (telefono) comando += ' ' + telefono;
+            
+            carrito.forEach(item => {
+                comando += ' ' + item.id + ' ' + item.cantidad;
+            });
+            
+            // Guardar en Firebase
+            const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+            db.collection('ventas').add({
+                fecha: new Date(),
+                cliente: cliente,
+                telefono: telefono,
+                productos: carrito,
+                total: total,
+                tipo: tipo,
+                rif: '291092270890'
+            });
+            
+            // Guardar cliente
+            db.collection('clientes').add({
+                nombre: cliente,
+                telefono: telefono,
+                ultimaCompra: new Date()
+            });
+            
+            // Mostrar ticket
+            mostrarTicket({
+                cliente: cliente,
+                telefono: telefono,
+                productos: carrito,
+                total: total,
+                tipo: tipo === 'contado' ? 'VENTA AL CONTADO' : 'VENTA A CRÉDITO'
+            });
+            
+            // Enviar comando al chat
+            tg.sendData(comando);
+            
+            // Limpiar
+            if (tipo === 'contado') carritoVender = [];
+            else carritoCredito = [];
+            
+            navigateTo('ticket');
+        }
+        
+        // ============ TICKET ============
+        function mostrarTicket(data) {
+            const ahora = new Date();
+            const fecha = ahora.toLocaleDateString('es-VE');
+            const hora = ahora.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+            const totalBs = (data.total * tasaActual).toFixed(2);
+            
+            const ticketHTML = `
+                <div class="ticket-header">
+                    <div class="ticket-logo">SB</div>
+                    <div class="ticket-business">SiReBa</div>
+                    <div class="ticket-rif">RIF: 291092270890</div>
+                    <small style="color:#888;">Tu tienda de confianza</small>
+                </div>
+                <hr class="ticket-divider">
+                <div class="ticket-row"><span>Fecha:</span><span>${fecha}</span></div>
+                <div class="ticket-row"><span>Hora:</span><span>${hora}</span></div>
+                <hr class="ticket-divider">
+                <div class="ticket-row"><span>Cliente:</span><span>${data.cliente}</span></div>
+                ${data.telefono ? `<div class="ticket-row"><span>Tel:</span><span>${data.telefono}</span></div>` : ''}
+                <div class="ticket-row"><span>Tipo:</span><span>${data.tipo}</span></div>
+                <hr class="ticket-divider">
+                <div style="font-size:12px;font-weight:600;color:#888;margin-bottom:6px;">PRODUCTOS</div>
+                ${data.productos.map(p => `
+                    <div class="ticket-row">
+                        <span>${p.nombre} x${p.cantidad}</span>
+                        <span>$${(p.precio * p.cantidad).toFixed(2)}</span>
+                    </div>
+                `).join('')}
+                <hr class="ticket-divider">
+                <div class="ticket-row total">
+                    <span>TOTAL USD:</span>
+                    <span>$${data.total.toFixed(2)}</span>
+                </div>
+                <div class="ticket-row" style="font-size:12px;color:#888;">
+                    <span>Tasa Bs:</span>
+                    <span>${tasaActual.toFixed(2)}</span>
+                </div>
+                <div class="ticket-row total">
+                    <span>TOTAL Bs:</span>
+                    <span>Bs. ${totalBs}</span>
+                </div>
+                <hr class="ticket-divider">
+                <div style="text-align:center;color:#A78BFA;font-size:13px;margin-top:8px;">
+                    ¡Gracias por tu compra!
+                </div>
+            `;
+            
+            document.getElementById('ticket-contenido').innerHTML = ticketHTML;
+        }
+        
+        function compartirTicket() {
+            const ticketDiv = document.getElementById('ticket-contenido');
+            const ticketText = ticketDiv.innerText;
+            
+            // Compartir como texto (alternativa simple)
+            tg.sendData('COMPARTIR_TICKET:' + ticketText);
+            
+            // También intentar compartir vía enlace
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Ticket SiReBa',
+                    text: ticketText
+                }).catch(() => {});
+            }
+        }
+        
+        // ============ REPORTE PERSONALIZADO ============
+        function generarReportePersonalizado() {
+            const desde = document.getElementById('fecha-desde').value;
+            const hasta = document.getElementById('fecha-hasta').value;
+            if (desde && hasta) {
+                sendCommand('/reporte ' + desde + ' ' + hasta);
+            } else {
+                alert('Selecciona ambas fechas');
+            }
+        }
+        
+        // ============ ACTUALIZAR PRODUCTO EXISTENTE ============
+        function actualizarExistente() {
+            const codigo = document.getElementById('act-existente-codigo').value.trim();
+            const cantidad = document.getElementById('act-existente-cantidad').value.trim();
+            const precio = document.getElementById('act-existente-precio').value.trim();
+            
+            if (!codigo || !cantidad) {
+                alert('Código y cantidad son obligatorios');
+                return;
+            }
+            
+            let comando = '/actualizar ' + codigo + ' ' + cantidad;
+            if (precio) comando += ' ' + precio;
+            
+            sendCommand(comando);
+        }
+        
+        // ============ AGREGAR NUEVO PRODUCTO ============
+        function agregarNuevoProducto() {
+            const nombre = document.getElementById('nuevo-nombre').value.trim();
+            const codigo = document.getElementById('nuevo-codigo').value.trim();
+            const cantidad = document.getElementById('nuevo-cantidad').value.trim();
+            const categoria = document.getElementById('nuevo-categoria').value;
+            const precio = document.getElementById('nuevo-precio').value.trim();
+            
+            if (!nombre || !codigo || !cantidad || !categoria || !precio) {
+                alert('Todos los campos son obligatorios');
+                return;
+            }
+            
+            const comando = '/actualizar nuevo ' + nombre + ' ' + codigo + ' ' + cantidad + ' ' + categoria + ' ' + precio;
+            sendCommand(comando);
+        }
+        
+        // ============ AJUSTAR TASA ============
+        function ajustarTasa() {
+            const tasa = document.getElementById('nueva-tasa').value.trim();
+            if (!tasa) {
+                alert('Ingresa la nueva tasa');
+                return;
+            }
+            
+            tasaActual = parseFloat(tasa);
+            
+            // Guardar en Firebase
+            db.collection('config').doc('tasa').set({
+                valor: parseFloat(tasa),
+                fecha: new Date()
+            });
+            
+            sendCommand('/tasa ' + tasa);
+            alert('Tasa actualizada a Bs. ' + tasa);
+            navigateTo('main');
+        }
+        
+        // ============ CARGAR CATÁLOGO ============
+        async function cargarCatalogo() {
+            const contenedor = document.getElementById('catalogo-contenido');
+            contenedor.innerHTML = '<div class="empty-state">Cargando productos...</div>';
+            
+            try {
+                const snapshot = await db.collection('productos').get();
+                const productos = [];
+                snapshot.forEach(doc => productos.push(doc.data()));
+                
+                if (productos.length === 0) {
+                    contenedor.innerHTML = '<div class="empty-state">No hay productos en el inventario</div>';
+                    return;
+                }
+                
+                contenedor.innerHTML = productos.map(p => `
+                    <div class="product-item">
+                        <div class="product-info">
+                            <div class="product-name">${p.nombre}</div>
+                            <div class="product-price">$${p.precio?.toFixed(2)} | Bs. ${(p.precio * tasaActual).toFixed(2)}</div>
+                            <div class="product-stock">Stock: ${p.stock || 0} | Código: ${p.codigo || 'N/A'}</div>
+                            <span class="badge">${p.categoria || 'Sin categoría'}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                contenedor.innerHTML = '<div class="empty-state">Error al cargar el catálogo</div>';
+            }
+        }
+        
+        // ============ CARGAR COBROS ============
+        async function cargarCobros() {
+            const contenedor = document.getElementById('cobros-contenido');
+            contenedor.innerHTML = '<div class="empty-state">Cargando deudores...</div>';
+            
+            try {
+                const snapshot = await db.collection('clientes').where('deuda', '>', 0).get();
+                const deudores = [];
+                snapshot.forEach(doc => deudores.push({ id: doc.id, ...doc.data() }));
+                
+                if (deudores.length === 0) {
+                    contenedor.innerHTML = '<div class="empty-state">🎉 No hay cuentas por cobrar</div>';
+                    return;
+                }
+                
+                contenedor.innerHTML = deudores.map(d => `
+                    <div class="product-item">
+                        <div class="product-info">
+                            <div class="product-name">👤 ${d.nombre}</div>
+                            <div class="product-price" style="color:#F59E0B;">Debe: $${d.deuda?.toFixed(2)}</div>
+                            <div class="product-stock">📱 ${d.telefono || 'Sin teléfono'}</div>
+                        </div>
+                        <button class="add-btn" style="background:#10B981;" onclick="sendCommand('/cobrar ${d.nombre} ${d.deuda}')">💰 Cobrar</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                contenedor.innerHTML = '<div class="empty-state">Error al cargar cobros</div>';
+            }
+        }
+        
+        // ============ PROVEEDORES ============
+        function agregarProveedor() {
+            const nombre = document.getElementById('prov-nombre').value.trim();
+            const telefono = document.getElementById('prov-telefono').value.trim();
+            const correo = document.getElementById('prov-correo').value.trim();
+            const productos = document.getElementById('prov-productos').value.trim();
+            const notas = document.getElementById('prov-notas').value.trim();
+            
+            if (!nombre) {
+                alert('El nombre es obligatorio');
+                return;
+            }
+            
+            db.collection('proveedores').add({
+                nombre, telefono, correo, productos, notas,
+                fechaCreacion: new Date()
+            });
+            
+            sendCommand('/proveedor agregar ' + nombre + ' ' + telefono + ' ' + correo + ' ' + productos);
+            alert('Proveedor agregado');
+            navigateTo('proveedores');
+        }
+        
+        async function cargarProveedoresModificar() {
+            const contenedor = document.getElementById('proveedor-modificar-contenido');
+            try {
+                const snapshot = await db.collection('proveedores').get();
+                const proveedores = [];
+                snapshot.forEach(doc => proveedores.push({ id: doc.id, ...doc.data() }));
+                
+                if (proveedores.length === 0) {
+                    contenedor.innerHTML = '<div class="empty-state">No hay proveedores registrados</div>';
+                    return;
+                }
+                
+                contenedor.innerHTML = `
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="form-input" placeholder="Buscar proveedor..." oninput="filtrarProveedores('modificar', this.value)">
+                    </div>
+                    <div id="proveedor-modificar-lista">
+                        ${proveedores.map(p => `
+                            <div class="product-item" data-nombre="${p.nombre.toLowerCase()}">
+                                <div class="product-info">
+                                    <div class="product-name">${p.nombre}</div>
+                                    <div class="product-stock">📱 ${p.telefono || 'N/A'} | ✉️ ${p.correo || 'N/A'}</div>
+                                </div>
+                                <button class="add-btn" onclick="modificarProveedorForm('${p.id}')">✏️</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                contenedor.innerHTML = '<div class="empty-state">Error al cargar proveedores</div>';
+            }
+        }
+        
+        async function cargarProveedoresEliminar() {
+            const contenedor = document.getElementById('proveedor-eliminar-contenido');
+            try {
+                const snapshot = await db.collection('proveedores').get();
+                const proveedores = [];
+                snapshot.forEach(doc => proveedores.push({ id: doc.id, ...doc.data() }));
+                
+                if (proveedores.length === 0) {
+                    contenedor.innerHTML = '<div class="empty-state">No hay proveedores registrados</div>';
+                    return;
+                }
+                
+                contenedor.innerHTML = proveedores.map(p => `
+                    <div class="product-item">
+                        <div class="product-info">
+                            <div class="product-name">${p.nombre}</div>
+                        </div>
+                        <button class="add-btn" style="background:#EF4444;" 
+                                onclick="if(confirm('¿Eliminar ${p.nombre}?')) { eliminarProveedor('${p.id}') }">🗑️</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                contenedor.innerHTML = '<div class="empty-state">Error al cargar proveedores</div>';
+            }
+        }
+        
+        function eliminarProveedor(id) {
+            db.collection('proveedores').doc(id).delete();
+            sendCommand('/proveedor eliminar ' + id);
+            alert('Proveedor eliminado');
+            cargarProveedoresEliminar();
+        }
+        
+        // ============ ELIMINAR PRODUCTO ============
+        async function cargarProductosEliminar() {
+            const lista = document.getElementById('eliminar-lista');
+            try {
+                const snapshot = await db.collection('productos').get();
+                const productos = [];
+                snapshot.forEach(doc => productos.push({ id: doc.id, ...doc.data() }));
+                
+                lista.innerHTML = productos.map(p => `
+                    <div class="product-item" data-nombre="${p.nombre.toLowerCase()}" data-codigo="${p.codigo?.toLowerCase() || ''}">
+                        <div class="product-info">
+                            <div class="product-name">${p.nombre}</div>
+                            <div class="product-stock">Código: ${p.codigo || 'N/A'}</div>
+                        </div>
+                        <button class="add-btn" style="background:#EF4444;" 
+                                onclick="if(confirm('¿Eliminar ${p.nombre}?')) { eliminarProducto('${p.id}') }">🗑️</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                lista.innerHTML = '<div class="empty-state">Error al cargar productos</div>';
+            }
+        }
+        
+        function eliminarProducto(id) {
+            db.collection('productos').doc(id).delete();
+            sendCommand('/eliminar ' + id);
+            alert('Producto eliminado');
+            cargarProductosEliminar();
+        }
+        
+        function filtrarProductosEliminar() {
+            const busqueda = document.getElementById('eliminar-buscar').value.toLowerCase();
+            document.querySelectorAll('#eliminar-lista .product-item').forEach(item => {
+                const nombre = item.dataset.nombre;
+                const codigo = item.dataset.codigo;
+                if (nombre.includes(busqueda) || codigo.includes(busqueda)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+        
+        // ============ CARGAR TASA INICIAL ============
+        async function cargarTasa() {
+            try {
+                const doc = await db.collection('config').doc('tasa').get();
+                if (doc.exists) {
+                    tasaActual = doc.data().valor;
+                }
+            } catch (error) {
+                console.log('Usando tasa por defecto:', tasaActual);
+            }
+        }
+        
+        // ============ INICIALIZAR ============
+        cargarTasa();
     </script>
 </body>
 </html>
