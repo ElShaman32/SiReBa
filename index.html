@@ -2,215 +2,295 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SiReBa POS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore-compat.js"></script>
-    <script src="config.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a1a; color: #fff; min-height: 100vh; padding: 16px; -webkit-tap-highlight-color: transparent; user-select: none; }
-        .app-container { max-width: 420px; margin: 0 auto; }
-        .header { text-align: center; padding: 20px 0; margin-bottom: 10px; }
-        .logo-container { width: 70px; height: 70px; background: linear-gradient(135deg, var(--pri, #8B5CF6), var(--sec, #6D28D9)); border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 24px; font-weight: bold; box-shadow: 0 4px 20px rgba(139,92,246,0.3); overflow: hidden; }
-        .logo-container img { width: 100%; height: 100%; object-fit: cover; }
-        .business-name { font-size: 26px; font-weight: bold; background: linear-gradient(135deg, var(--pri, #8B5CF6), #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
-        .business-rif { font-size: 12px; color: #666; }
-        .user-info { background: #2a2a2a; border-radius: 14px; padding: 14px 16px; margin-bottom: 20px; border: 1px solid #3a3a3a; display: flex; align-items: center; gap: 12px; }
-        .user-avatar { width: 44px; height: 44px; background: linear-gradient(135deg, var(--pri, #8B5CF6), var(--sec, #6D28D9)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-        .user-details { flex: 1; min-width: 0; }
-        .user-name { font-size: 15px; font-weight: 600; }
-        .user-id { font-size: 12px; color: #888; }
-        .user-role { font-size: 11px; color: #A78BFA; }
-        .screen { display: none; animation: fadeIn 0.2s ease; }
-        .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .main-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-        .menu-btn { background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 14px; padding: 18px 14px; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 10px; text-align: left; width: 100%; }
-        .menu-btn:active { background: #3a3a3a; border-color: var(--pri, #8B5CF6); transform: scale(0.97); }
-        .menu-btn .icon { font-size: 22px; flex-shrink: 0; }
-        .menu-btn .label { flex: 1; line-height: 1.2; }
-        .menu-btn.full-width { grid-column: 1 / -1; }
-        .menu-btn.highlight { background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(109,40,217,0.2)); border-color: var(--pri, #8B5CF6); }
-        .sub-menu { display: flex; flex-direction: column; gap: 10px; }
-        .sub-btn { background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 14px; padding: 16px 18px; color: #fff; font-size: 15px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; }
-        .sub-btn:active { background: #3a3a3a; border-color: var(--pri, #8B5CF6); transform: scale(0.98); }
-        .form-group { margin-bottom: 14px; }
-        .form-label { display: block; font-size: 13px; color: #A78BFA; margin-bottom: 6px; font-weight: 500; }
-        .form-input { width: 100%; padding: 14px 16px; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 12px; color: #fff; font-size: 15px; transition: all 0.2s ease; }
-        .form-input:focus { outline: none; border-color: var(--pri, #8B5CF6); box-shadow: 0 0 0 3px rgba(139,92,246,0.1); }
-        .form-input::placeholder { color: #666; }
-        select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px; }
-        .btn-row { display: flex; gap: 10px; margin-top: 6px; }
-        .btn-primary { flex: 1; padding: 14px; background: linear-gradient(135deg, var(--pri, #8B5CF6), var(--sec, #6D28D9)); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
-        .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
-        .btn-secondary { flex: 1; padding: 14px; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 12px; color: #fff; font-size: 15px; cursor: pointer; transition: all 0.2s ease; }
-        .btn-secondary:active { background: #3a3a3a; }
-        .btn-danger { background: rgba(239,68,68,0.2); border: 1px solid #EF4444; color: #EF4444; }
-        .btn-full { width: 100%; margin-top: 8px; }
-        .cart-container { background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 14px; padding: 14px; margin-top: 16px; max-height: 200px; overflow-y: auto; }
-        .cart-title { font-size: 14px; font-weight: 600; color: #A78BFA; margin-bottom: 10px; }
-        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #3a3a3a; font-size: 14px; }
-        .cart-item:last-child { border-bottom: none; }
-        .cart-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; margin-top: 10px; padding-top: 10px; border-top: 2px solid var(--pri, #8B5CF6); color: #A78BFA; }
-        .search-box { position: relative; margin-bottom: 14px; }
-        .search-box .form-input { padding-left: 44px; }
-        .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 18px; color: #888; }
-        .product-list { max-height: 250px; overflow-y: auto; margin-bottom: 14px; }
-        .product-item { background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
-        .product-info { flex: 1; }
-        .product-name { font-weight: 600; font-size: 14px; }
-        .product-price { font-size: 12px; color: #A78BFA; }
-        .product-price-usd { font-size: 10px; color: #888; }
-        .product-stock { font-size: 11px; color: #888; }
-        .add-btn { background: var(--pri, #8B5CF6); border: none; border-radius: 10px; padding: 8px 16px; color: #fff; font-weight: 600; cursor: pointer; font-size: 13px; }
-        .add-btn:active { background: var(--sec, #6D28D9); }
-        .qty-input { width: 50px; padding: 8px; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 8px; color: #fff; text-align: center; font-size: 13px; }
-        .ticket { background: #2a2a2a; border: 2px solid var(--pri, #8B5CF6); border-radius: 16px; padding: 20px; max-width: 350px; margin: 0 auto; }
-        .ticket-header { text-align: center; margin-bottom: 16px; }
-        .ticket-logo { width: 50px; height: 50px; background: linear-gradient(135deg, var(--pri, #8B5CF6), var(--sec, #6D28D9)); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 18px; overflow: hidden; }
-        .ticket-logo img { width: 100%; height: 100%; object-fit: cover; }
-        .ticket-business { font-size: 18px; font-weight: 700; color: #A78BFA; }
-        .ticket-rif { font-size: 11px; color: #666; }
-        .ticket-divider { border: none; border-top: 1px dashed #3a3a3a; margin: 12px 0; }
-        .ticket-row { display: flex; justify-content: space-between; font-size: 13px; margin: 4px 0; }
-        .ticket-row.total { font-size: 16px; font-weight: 700; color: #A78BFA; margin-top: 8px; }
-        .back-btn { display: flex; align-items: center; gap: 8px; background: none; border: none; color: #888; font-size: 14px; cursor: pointer; padding: 8px 0; margin-bottom: 14px; }
-        .back-btn:active { color: #A78BFA; }
-        .footer { text-align: center; margin-top: 20px; color: #555; font-size: 11px; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #1a1a1a; }
-        ::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 2px; }
-        .empty-state { text-align: center; padding: 30px; color: #666; font-size: 14px; }
-        .badge { display: inline-block; background: rgba(139,92,246,0.2); color: #A78BFA; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
-        .response-msg { background: #2a2a2a; border: 1px solid var(--pri, #8B5CF6); border-radius: 12px; padding: 16px; margin-top: 16px; text-align: center; animation: fadeIn 0.3s ease; font-size: 14px; }
-        .response-msg.success { border-color: #10B981; color: #10B981; }
-        .response-msg.error { border-color: #EF4444; color: #EF4444; }
-        .loading-spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid #3a3a3a; border-top-color: var(--pri, #8B5CF6); border-radius: 50%; animation: spin 0.6s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        body {
+            font-family: -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+        
+        .player-box {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 30px 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .radio-icon {
+            font-size: 80px;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .status {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        
+        .play-btn {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 4px solid #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+            font-size: 35px;
+            cursor: pointer;
+            margin: 0 auto 20px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .play-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .play-btn.playing {
+            background: rgba(255, 107, 107, 0.2);
+            border-color: #feca57;
+            color: #feca57;
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.3);
+        }
+        
+        .play-btn.loading {
+            opacity: 0.6;
+        }
+        
+        .message {
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 15px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .message.error {
+            background: rgba(255, 107, 107, 0.15);
+            color: #ff6b6b;
+        }
+        
+        .message.success {
+            background: rgba(46, 213, 115, 0.15);
+            color: #2ed573;
+        }
+        
+        .debug-info {
+            margin-top: 20px;
+            font-size: 11px;
+            color: #555;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <div class="screen active" id="screen-main">
-            <div class="header"><div class="logo-container"><img src="logo.png" alt="Logo" onerror="this.style.display='none';this.parentElement.textContent=TIENDA.nombre.charAt(0)"></div><div class="business-name"></div><div class="business-rif"></div></div>
-            <div class="user-info"><div class="user-avatar" id="userAvatar">👤</div><div class="user-details"><div class="user-name" id="userName">Cargando...</div><div class="user-id" id="userId">ID: ---</div><div class="user-role">Administrador</div></div></div>
-            <div class="main-menu">
-                <button class="menu-btn" onclick="navigateTo('reporte')"><span class="icon">📊</span><span class="label">Reporte De Ventas</span></button>
-                <button class="menu-btn highlight" onclick="navigateTo('vender')"><span class="icon">🛒</span><span class="label">Vender</span></button>
-                <button class="menu-btn highlight" onclick="navigateTo('credito')"><span class="icon">💰</span><span class="label">Crédito</span></button>
-                <button class="menu-btn" onclick="navigateTo('actualizar')"><span class="icon">📦</span><span class="label">Actualizar Inventario</span></button>
-                <button class="menu-btn" onclick="navigateTo('ajustar')"><span class="icon">💲</span><span class="label">Ajustar Tasa</span></button>
-                <button class="menu-btn" onclick="navigateTo('catalogo')"><span class="icon">📖</span><span class="label">Catálogo</span></button>
-                <button class="menu-btn" onclick="navigateTo('cobros')"><span class="icon">🤑</span><span class="label">Cobros</span></button>
-                <button class="menu-btn" onclick="navigateTo('proveedores')"><span class="icon">🏭</span><span class="label">Proveedores</span></button>
-                <button class="menu-btn full-width" onclick="navigateTo('ayuda')"><span style="font-size:18px;">❓</span><span class="label">Ayuda</span><span style="font-size:18px;">🆘</span></button>
+    <div class="container">
+        <div class="player-box">
+            <div class="radio-icon">📻</div>
+            <h1>Mi Radio Web</h1>
+            <div class="status">Listen2MyRadio</div>
+            
+            <button class="play-btn" id="playBtn" onclick="handlePlay()">
+                ▶
+            </button>
+            
+            <div id="messageBox"></div>
+            
+            <div class="debug-info" id="debugInfo">
+                Iniciando...
             </div>
-            <div class="footer" id="footer-text"></div>
         </div>
-        <div class="screen" id="screen-reporte"><button class="back-btn" onclick="navigateTo('main')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">📊 Reporte De Ventas</h2><div class="sub-menu"><button class="sub-btn" onclick="webhookAI('reporte',{tipo:'hoy'},'response-reporte')">📅 Hoy</button><button class="sub-btn" onclick="webhookAI('reporte',{tipo:'ayer'},'response-reporte')">📆 Ayer</button><button class="sub-btn" onclick="webhookAI('reporte',{tipo:'semana'},'response-reporte')">📊 Esta Semana</button><button class="sub-btn" onclick="navigateTo('reporte-personalizado')">🗓️ Período Personalizado</button></div><div id="response-reporte"></div></div>
-        <div class="screen" id="screen-reporte-personalizado"><button class="back-btn" onclick="navigateTo('reporte')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">🗓️ Período Personalizado</h2><div class="form-group"><label class="form-label">Desde</label><input type="date" id="fecha-desde" class="form-input"></div><div class="form-group"><label class="form-label">Hasta</label><input type="date" id="fecha-hasta" class="form-input"></div><button class="btn-primary btn-full" onclick="generarReportePersonalizado()">📊 Generar Reporte</button><div id="response-reporte-pers"></div></div>
-        <div class="screen" id="screen-vender"><button class="back-btn" onclick="navigateTo('main')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">🛒 Vender</h2><div class="form-group"><label class="form-label">👤 Nombre del Cliente</label><input type="text" id="vender-cliente" class="form-input" placeholder="Nombre del cliente"></div><div class="form-group"><label class="form-label">📱 Teléfono</label><input type="tel" id="vender-telefono" class="form-input" placeholder="04121234567"></div><div class="search-box"><span class="search-icon">🔍</span><input type="text" id="vender-buscar" class="form-input" placeholder="Buscar producto..." oninput="filtrarProductos('vender')"></div><div class="product-list" id="vender-lista-productos"></div><div class="cart-container"><div class="cart-title">📋 Carrito</div><div id="vender-items"></div><div class="cart-total"><span>TOTAL:</span><span id="vender-total">Bs. 0,00</span></div></div><div class="btn-row"><button class="btn-secondary btn-danger" onclick="vaciarCarrito('vender')">🗑️ Vaciar</button><button class="btn-primary" onclick="finalizarVenta('contado')">✅ Finalizar Venta</button></div><div id="response-vender"></div></div>
-        <div class="screen" id="screen-credito"><button class="back-btn" onclick="navigateTo('main')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">💰 Venta a Crédito</h2><div class="form-group"><label class="form-label">👤 Nombre del Cliente</label><input type="text" id="credito-cliente" class="form-input" placeholder="Nombre del cliente"></div><div class="form-group"><label class="form-label">📱 Teléfono</label><input type="tel" id="credito-telefono" class="form-input" placeholder="04121234567"></div><div class="search-box"><span class="search-icon">🔍</span><input type="text" id="credito-buscar" class="form-input" placeholder="Buscar producto..." oninput="filtrarProductos('credito')"></div><div class="product-list" id="credito-lista-productos"></div><div class="cart-container"><div class="cart-title">📋 Carrito (Crédito)</div><div id="credito-items"></div><div class="cart-total"><span>TOTAL:</span><span id="credito-total">Bs. 0,00</span></div></div><div class="btn-row"><button class="btn-secondary btn-danger" onclick="vaciarCarrito('credito')">🗑️ Vaciar</button><button class="btn-primary" onclick="finalizarVenta('credito')">✅ Finalizar Crédito</button></div><div id="response-credito"></div></div>
-        <div class="screen" id="screen-actualizar"><button class="back-btn" onclick="navigateTo('main')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">📦 Actualizar Inventario</h2><div class="sub-menu"><button class="sub-btn" onclick="navigateTo('actualizar-existente')">📝 Agregar Stock a Existente</button><button class="sub-btn" onclick="navigateTo('actualizar-nuevo')">➕ Producto Nuevo</button><button class="sub-btn" onclick="navigateTo('producto-modificar')">✏️ Modificar Producto</button><button class="sub-btn" onclick="navigateTo('eliminar')" style="border-color:#EF4444;"><span style="color:#EF4444;">🗑️ Eliminar Producto</span></button></div></div>
-        <div class="screen" id="screen-actualizar-existente"><button class="back-btn" onclick="navigateTo('actualizar')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">📝 Agregar Stock</h2><div class="form-group"><label class="form-label">Código del Producto</label><input type="text" id="act-existente-codigo" class="form-input" placeholder="Código"></div><div class="form-group"><label class="form-label">Cantidad a Agregar</label><input type="number" id="act-existente-cantidad" class="form-input" placeholder="Cantidad"></div><div class="form-group"><label class="form-label">Nuevo Precio USD (dejar vacío si no cambia)</label><input type="number" id="act-existente-precio-usd" class="form-input" placeholder="Precio USD" step="0.01"></div><button class="btn-primary btn-full" onclick="actualizarExistente()">💾 Guardar Cambios</button><div id="response-act-existente"></div></div>
-        <div class="screen" id="screen-actualizar-nuevo"><button class="back-btn" onclick="navigateTo('actualizar')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">➕ Producto Nuevo</h2><div class="form-group"><label class="form-label">Código</label><input type="text" id="nuevo-codigo" class="form-input" placeholder="Código único"></div><div class="form-group"><label class="form-label">Nombre</label><input type="text" id="nuevo-nombre" class="form-input" placeholder="Nombre del producto"></div><div class="form-group"><label class="form-label">Categoría</label><select id="nuevo-categoria" class="form-input"><option value="">Seleccionar categoría</option><option value="Bebidas">Bebidas</option><option value="Alimentos">Alimentos</option><option value="Granos">Granos</option><option value="Panaderia">Panadería</option><option value="Lacteos">Lácteos</option><option value="Limpieza">Limpieza</option><option value="Otros">Otros</option></select></div><div class="form-group"><label class="form-label">Cantidad Inicial</label><input type="number" id="nuevo-cantidad" class="form-input" placeholder="Stock inicial"></div><div class="form-group"><label class="form-label">Precio USD</label><input type="number" id="nuevo-precio-usd" class="form-input" placeholder="Precio en USD" step="0.01"></div><button class="btn-primary btn-full" onclick="agregarNuevoProducto()">💾 Guardar Producto</button><div id="response-nuevo"></div></div>
-        <div class="screen" id="screen-producto-modificar"><button class="back-btn" onclick="navigateTo('actualizar')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">✏️ Modificar Producto</h2><div class="search-box"><span class="search-icon">🔍</span><input type="text" id="modificar-buscar" class="form-input" placeholder="Buscar producto..." oninput="filtrarProductosModificar()"></div><div id="producto-modificar-lista"></div></div>
-        <div class="screen" id="screen-producto-modificar-form"><button class="back-btn" onclick="navigateTo('producto-modificar')">← Volver a la lista</button><h2 style="margin-bottom:16px;color:#A78BFA;">✏️ Editar Producto</h2><input type="hidden" id="modificar-id"><div class="form-group"><label class="form-label">Código</label><input type="text" id="modificar-codigo" class="form-input"></div><div class="form-group"><label class="form-label">Nombre</label><input type="text" id="modificar-nombre" class="form-input"></div><div class="form-group"><label class="form-label">Categoría</label><select id="modificar-categoria" class="form-input"><option value="">Seleccionar</option><option value="Bebidas">Bebidas</option><option value="Alimentos">Alimentos</option><option value="Granos">Granos</option><option value="Panaderia">Panadería</option><option value="Lacteos">Lácteos</option><option value="Limpieza">Limpieza</option><option value="Otros">Otros</option></select></div><div class="form-group"><label class="form-label">Stock</label><input type="number" id="modificar-stock" class="form-input"></div><div class="form-group"><label class="form-label">Precio USD</label><input type="number" id="modificar-precio-usd" class="form-input" step="0.01"></div><div class="form-group"><label class="form-label">Precio Bs</label><input type="number" id="modificar-precio-bs" class="form-input" step="0.01"></div><button class="btn-primary btn-full" onclick="guardarModificacionProducto()">💾 Guardar Cambios</button><div id="response-modificar-prod"></div></div>
-        <div class="screen" id="screen-ajustar"><button class="back-btn" onclick="navigateTo('main')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">💲 Ajustar Tasa del Dólar</h2><div class="form-group"><label class="form-label">Nueva Tasa Bs/USD</label><input type="number" id="nueva-tasa" class="form-input" placeholder="Ej: 35,50" step="0.01"></div><button class="btn-primary btn-full" onclick="ajustarTasa()">💾 Guardar Tasa</button><div id="response-tasa"></div></div>
-        <div class="screen" id="screen-catalogo"><button class="back-btn" onclick="navigateTo('main')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">📖 Catálogo</h2><div id="catalogo-contenido"><div class="empty-state">Cargando...</div></div></div>
-        <div class="screen" id="screen-cobros"><button class="back-btn" onclick="navigateTo('main')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">🤑 Cuentas por Cobrar</h2><div id="cobros-contenido"><div class="empty-state">Cargando...</div></div></div>
-        <div class="screen" id="screen-proveedores"><button class="back-btn" onclick="navigateTo('main')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">🏭 Gestión Proveedores</h2><div class="sub-menu"><button class="sub-btn" onclick="navigateTo('proveedor-agregar')">➕ Agregar Proveedor</button><button class="sub-btn" onclick="navigateTo('proveedor-modificar')">✏️ Modificar Proveedor</button><button class="sub-btn" onclick="navigateTo('proveedor-eliminar')">🗑️ Eliminar Proveedor</button></div></div>
-        <div class="screen" id="screen-proveedor-agregar"><button class="back-btn" onclick="navigateTo('proveedores')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">➕ Agregar Proveedor</h2><div class="form-group"><label class="form-label">Nombre</label><input type="text" id="prov-nombre" class="form-input" placeholder="Nombre del proveedor"></div><div class="form-group"><label class="form-label">Teléfono</label><input type="tel" id="prov-telefono" class="form-input" placeholder="Teléfono"></div><div class="form-group"><label class="form-label">Correo</label><input type="email" id="prov-correo" class="form-input" placeholder="Correo electrónico"></div><div class="form-group"><label class="form-label">Productos que provee</label><input type="text" id="prov-productos" class="form-input" placeholder="Ej: Café, Carotas"></div><div class="form-group"><label class="form-label">Notas</label><input type="text" id="prov-notas" class="form-input" placeholder="Notas adicionales"></div><button class="btn-primary btn-full" onclick="agregarProveedor()">💾 Guardar Proveedor</button><div id="response-prov"></div></div>
-        <div class="screen" id="screen-proveedor-modificar"><button class="back-btn" onclick="navigateTo('proveedores')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">✏️ Modificar Proveedor</h2><div id="proveedor-modificar-contenido"><div class="empty-state">Cargando...</div></div></div>
-        <div class="screen" id="screen-proveedor-modificar-form"><button class="back-btn" onclick="navigateTo('proveedor-modificar')">← Volver a la lista</button><h2 style="margin-bottom:16px;color:#A78BFA;">✏️ Editar Proveedor</h2><input type="hidden" id="modificar-prov-id"><div class="form-group"><label class="form-label">Nombre</label><input type="text" id="modificar-prov-nombre" class="form-input"></div><div class="form-group"><label class="form-label">Teléfono</label><input type="tel" id="modificar-prov-telefono" class="form-input"></div><div class="form-group"><label class="form-label">Correo</label><input type="email" id="modificar-prov-correo" class="form-input"></div><div class="form-group"><label class="form-label">Productos</label><input type="text" id="modificar-prov-productos" class="form-input"></div><div class="form-group"><label class="form-label">Notas</label><input type="text" id="modificar-prov-notas" class="form-input"></div><button class="btn-primary btn-full" onclick="guardarModificacionProveedor()">💾 Guardar Cambios</button><div id="response-modificar-prov"></div></div>
-        <div class="screen" id="screen-proveedor-eliminar"><button class="back-btn" onclick="navigateTo('proveedores')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">🗑️ Eliminar Proveedor</h2><div id="proveedor-eliminar-contenido"><div class="empty-state">Cargando...</div></div></div>
-        <div class="screen" id="screen-eliminar"><button class="back-btn" onclick="navigateTo('actualizar')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">🗑️ Eliminar Producto</h2><div class="search-box"><span class="search-icon">🔍</span><input type="text" id="eliminar-buscar" class="form-input" placeholder="Buscar producto..." oninput="filtrarProductosEliminar()"></div><div id="eliminar-lista"></div></div>
-        <div class="screen" id="screen-ayuda"><button class="back-btn" onclick="navigateTo('main')">← Volver</button><h2 style="margin-bottom:16px;color:#A78BFA;">❓ Ayuda 🆘</h2><div class="sub-menu"><div class="sub-btn" style="cursor:default;border-color:transparent;">📊 <small>Reporte: ver ventas por período</small></div><div class="sub-btn" style="cursor:default;border-color:transparent;">🛒 <small>Vender: venta al contado</small></div><div class="sub-btn" style="cursor:default;border-color:transparent;">💰 <small>Crédito: venta a crédito</small></div><div class="sub-btn" style="cursor:default;border-color:transparent;">📦 <small>Actualizar: stock, nuevo, modificar o eliminar</small></div><div class="sub-btn" style="cursor:default;border-color:transparent;">💲 <small>Ajustar: tasa del dólar</small></div><div class="sub-btn" style="cursor:default;border-color:transparent;">📖 <small>Catálogo: ver inventario</small></div><div class="sub-btn" style="cursor:default;border-color:transparent;">🤑 <small>Cobros: cuentas por cobrar</small></div><div class="sub-btn" style="cursor:default;border-color:transparent;">🏭 <small>Proveedores: agregar, modificar o eliminar</small></div></div></div>
-        <div class="screen" id="screen-ticket"><button class="back-btn" onclick="navigateTo('main')">← Volver al Inicio</button><div class="ticket" id="ticket-contenido"></div><div class="btn-row" style="margin-top:14px;"><button class="btn-secondary" onclick="compartirTicket()">📤 Compartir</button><button class="btn-primary" onclick="navigateTo('main')">🏠 Inicio</button></div></div>
     </div>
 
     <script>
-        document.querySelector('.business-name').textContent = TIENDA.nombre;
-        document.querySelector('.business-rif').textContent = 'RIF: ' + TIENDA.rif;
-        document.querySelector('#footer-text').textContent = 'Diseñado por Leonel • DeepSeek';
-        document.title = TIENDA.nombre + ' POS';
-        const M = TIENDA.moneda, RIF = TIENDA.rif, NOMBRE = TIENDA.nombre, WEBHOOK_URL = TIENDA.webhookUrl || '';
-        document.documentElement.style.setProperty('--pri', TIENDA.colorPrimario);
-        document.documentElement.style.setProperty('--sec', TIENDA.colorSecundario);
-        firebase.initializeApp(TIENDA.firebase);
-        const db = firebase.firestore();
-        let carritoVender = [], carritoCredito = [], todosProductos = [], tasaActual = 35.50;
-
-        const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
-        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { tg.ready(); tg.expand(); } });
-        const user = tg.initDataUnsafe.user;
-        if (user) { document.getElementById('userName').textContent = '👤 ' + user.first_name + (user.last_name ? ' ' + user.last_name : ''); document.getElementById('userId').textContent = 'ID: ' + user.id; document.getElementById('userAvatar').textContent = user.first_name.charAt(0); }
-
-        function fV(n) { return Number(n).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-
-        function actualizarCarritoUI(modo) { const ic = document.getElementById(modo + '-items'); const ts = document.getElementById(modo + '-total'); if (ic) ic.innerHTML = '<div class="empty-state" style="padding:10px;font-size:13px;">Carrito vacío</div>'; if (ts) ts.textContent = M + ' 0,00'; }
-
-        async function webhookAI(accion, data, responseDivId) {
-            const div = responseDivId ? document.getElementById(responseDivId) : null;
-            if (div) div.innerHTML = '<div class="response-msg"><div class="loading-spinner"></div> Procesando...</div>';
-            const payload = { accion, ...data, tienda: NOMBRE, rif: RIF, usuario: user ? { id: user.id, nombre: user.first_name } : null };
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+        
+        let audio = null;
+        let isPlaying = false;
+        let playBtn = document.getElementById('playBtn');
+        let messageBox = document.getElementById('messageBox');
+        let debugInfo = document.getElementById('debugInfo');
+        
+        // Lista de métodos para probar
+        const streamBase = 'http://37.157.242.105:33097/;';
+        let currentMethod = 0;
+        
+        const methods = [
+            {
+                name: 'Proxy corsproxy.io',
+                getUrl: () => 'https://corsproxy.io/?' + encodeURIComponent(streamBase)
+            },
+            {
+                name: 'Proxy codecors',
+                getUrl: () => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(streamBase)
+            },
+            {
+                name: 'Directo (solo HTTP)',
+                getUrl: () => streamBase,
+                note: 'Solo funciona en HTTP, no en HTTPS'
+            }
+        ];
+        
+        function log(msg, isError = false) {
+            console.log(msg);
+            debugInfo.innerHTML += '<br>' + msg;
+            if (isError) {
+                showMessage(msg, true);
+            }
+        }
+        
+        function showMessage(msg, isError = false) {
+            messageBox.innerHTML = `<div class="message ${isError ? 'error' : 'success'}">${msg}</div>`;
+            if (!isError) {
+                setTimeout(() => {
+                    if (messageBox.textContent === msg) {
+                        messageBox.innerHTML = '';
+                    }
+                }, 3000);
+            }
+        }
+        
+        function updateButton(type) {
+            playBtn.className = 'play-btn';
+            if (type === 'loading') {
+                playBtn.classList.add('loading');
+                playBtn.textContent = '⏳';
+            } else if (type === 'playing') {
+                playBtn.classList.add('playing');
+                playBtn.textContent = '⏸';
+            } else {
+                playBtn.textContent = '▶';
+            }
+        }
+        
+        async function handlePlay() {
+            if (isPlaying) {
+                stopAudio();
+                return;
+            }
+            
+            // Intentar con el método actual
+            await tryPlayMethod(currentMethod);
+        }
+        
+        async function tryPlayMethod(methodIndex) {
+            if (methodIndex >= methods.length) {
+                log('❌ Todos los métodos fallaron. Prueba desde http://', true);
+                showMessage('Error: Intenta abrir desde un navegador común', true);
+                updateButton('stopped');
+                return;
+            }
+            
+            const method = methods[methodIndex];
+            log(`🎯 Probando: ${method.name}...`);
+            updateButton('loading');
+            showMessage(`Conectando vía ${method.name}...`);
+            
             try {
-                const resp = await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                const result = await resp.json();
-                if (div) { const msg = result.mensaje || result.message || '✅ Completado'; div.innerHTML = '<div class="response-msg success">' + msg + '</div>'; setTimeout(() => { if (div) div.innerHTML = ''; }, 5000); }
-                return result;
-            } catch (e) { if (div) div.innerHTML = '<div class="response-msg error">❌ Error de conexión</div>'; return null; }
+                // Detener audio anterior
+                if (audio) {
+                    audio.pause();
+                    audio.src = '';
+                    audio = null;
+                }
+                
+                const url = method.getUrl();
+                log(`URL: ${url}`);
+                
+                audio = new Audio();
+                audio.src = url;
+                audio.volume = 0.8;
+                audio.preload = 'auto';
+                
+                // Timeout de 8 segundos para conectar
+                const timeout = setTimeout(() => {
+                    if (!isPlaying && audio) {
+                        log(`⏰ Timeout con ${method.name}`);
+                        audio.pause();
+                        audio.src = '';
+                        currentMethod++;
+                        tryPlayMethod(currentMethod);
+                    }
+                }, 8000);
+                
+                await audio.play();
+                
+                clearTimeout(timeout);
+                
+                // Éxito
+                isPlaying = true;
+                updateButton('playing');
+                showMessage('✅ ¡Transmitiendo!');
+                log(`✅ Funcionó con: ${method.name}`);
+                
+                audio.onerror = (e) => {
+                    log(`Error con ${method.name}: ${e.type}`, true);
+                    isPlaying = false;
+                    updateButton('stopped');
+                    audio.src = '';
+                    currentMethod++;
+                    tryPlayMethod(currentMethod);
+                };
+                
+                audio.onended = () => {
+                    if (isPlaying) {
+                        log('Stream terminó, reconectando...');
+                        stopAudio();
+                        setTimeout(() => handlePlay(), 2000);
+                    }
+                };
+                
+            } catch (error) {
+                log(`❌ Falló ${method.name}: ${error.message}`, true);
+                updateButton('stopped');
+                currentMethod++;
+                setTimeout(() => tryPlayMethod(currentMethod), 500);
+            }
         }
-
-        function navigateTo(sn) {
-            if (sn === 'main') { carritoVender = []; carritoCredito = []; actualizarCarritoUI('vender'); actualizarCarritoUI('credito'); }
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            const t = document.getElementById('screen-' + sn);
-            if (t) { t.classList.add('active'); window.scrollTo(0, 0); }
-            if (sn === 'catalogo') cargarCatalogo();
-            if (sn === 'cobros') cargarCobros();
-            if (sn === 'proveedor-modificar') cargarProveedoresModificar();
-            if (sn === 'proveedor-eliminar') cargarProveedoresEliminar();
-            if (sn === 'vender') cargarProductos('vender');
-            if (sn === 'credito') cargarProductos('credito');
-            if (sn === 'eliminar') cargarProductosEliminar();
-            if (sn === 'producto-modificar') cargarProductosModificar();
+        
+        function stopAudio() {
+            if (audio) {
+                audio.pause();
+                audio.src = '';
+            }
+            isPlaying = false;
+            updateButton('stopped');
+            showMessage('Reproducción detenida');
         }
-
-        async function cargarProductos(modo) { try { const snap = await db.collection('productos').get(); todosProductos = []; snap.forEach(d => todosProductos.push({ id: d.id, ...d.data() })); mostrarProductos(modo, todosProductos); } catch (e) {} }
-        function mostrarProductos(modo, prods) { const lista = document.getElementById(modo + '-lista-productos'); if (!lista) return; if (!prods.length) { lista.innerHTML = '<div class="empty-state">No hay productos</div>'; return; } lista.innerHTML = prods.map(p => { const pb = p.precio_bs || 0, pu = p.precio_usd || 0, nombre = (p.nombre || p.id || '').replace(/'/g, "\\'"); return '<div class="product-item"><div class="product-info"><div class="product-name">' + (p.nombre || p.id) + '</div><div class="product-price">' + M + ' ' + fV(pb) + '</div>' + (pu > 0 ? '<div class="product-price-usd">$' + Number(pu).toFixed(2) + '</div>' : '') + '<div class="product-stock">Stock: ' + (p.stock || p.cantidad || 0) + ' | ' + (p.codigo || '') + '</div></div><input type="number" class="qty-input" id="qty-' + modo + '-' + p.id + '" value="1" min="1" style="width:55px;"><button class="add-btn" onclick="agregarAlCarrito(\'' + modo + '\',\'' + p.id + '\',\'' + nombre + '\',' + pb + ',' + pu + ')">➕</button></div>'; }).join(''); }
-        function filtrarProductos(modo) { const b = document.getElementById(modo + '-buscar').value.toLowerCase(); mostrarProductos(modo, todosProductos.filter(p => (p.nombre || '').toLowerCase().includes(b) || (p.codigo || '').toLowerCase().includes(b))); }
-        function agregarAlCarrito(modo, id, nombre, pb, pu) { const q = parseInt(document.getElementById('qty-' + modo + '-' + id)?.value) || 1, c = modo === 'vender' ? carritoVender : carritoCredito, ex = c.find(i => i.id === id); if (ex) ex.cantidad += q; else c.push({ id, nombre, precio_bs: pb, precio_usd: pu, cantidad: q }); actualizarCarrito(modo); tg.HapticFeedback.impactOccurred('light'); }
-        function actualizarCarrito(modo) { const c = modo === 'vender' ? carritoVender : carritoCredito, ic = document.getElementById(modo + '-items'), ts = document.getElementById(modo + '-total'); if (!c.length) { ic.innerHTML = '<div class="empty-state" style="padding:10px;font-size:13px;">Carrito vacío</div>'; ts.textContent = M + ' 0,00'; return; } let total = 0; ic.innerHTML = c.map((item, i) => { const sub = (item.precio_bs || 0) * item.cantidad; total += sub; return '<div class="cart-item"><span>' + item.nombre + ' x' + item.cantidad + '</span><span>' + M + ' ' + fV(sub) + ' <small style="color:#EF4444;cursor:pointer;margin-left:6px;" onclick="eliminarDelCarrito(\'' + modo + '\',' + i + ')">✕</small></span></div>'; }).join(''); ts.textContent = M + ' ' + fV(total); }
-        function eliminarDelCarrito(modo, i) { const c = modo === 'vender' ? carritoVender : carritoCredito; c.splice(i, 1); actualizarCarrito(modo); }
-        function vaciarCarrito(modo) { if (modo === 'vender') carritoVender = []; else carritoCredito = []; actualizarCarrito(modo); }
-        async function finalizarVenta(tipo) { const c = tipo === 'contado' ? carritoVender : carritoCredito, pf = tipo === 'contado' ? 'vender' : 'credito'; const cliente = document.getElementById(pf + '-cliente').value.trim(), tel = document.getElementById(pf + '-telefono').value.trim(); if (!cliente) return alert('Ingresa el nombre del cliente'); if (!c.length) return alert('Carrito vacío'); const totalBs = c.reduce((s, i) => s + (i.precio_bs || 0) * i.cantidad, 0), totalUsd = c.reduce((s, i) => s + (i.precio_usd || 0) * i.cantidad, 0); const productos = c.map(i => ({ id: i.id, nombre: i.nombre, cantidad: i.cantidad, precio_bs: i.precio_bs, precio_usd: i.precio_usd })); const respDiv = 'response-' + pf; await webhookAI(tipo === 'contado' ? 'vender' : 'credito', { cliente, telefono: tel, productos, total_bs: totalBs, total_usd: totalUsd }, respDiv); const coleccion = tipo === 'contado' ? 'ventas' : 'creditos'; db.collection(coleccion).add({ fecha: new Date(), cliente, telefono: tel, productos, total_bs: totalBs, total_usd: totalUsd, tipo, pagado: tipo === 'contado' }); mostrarTicket({ cliente, telefono: tel, productos: c, total_bs: totalBs, total_usd: totalUsd, tipo: tipo === 'contado' ? 'VENTA AL CONTADO' : 'VENTA A CRÉDITO' }); if (tipo === 'contado') carritoVender = []; else carritoCredito = []; navigateTo('ticket'); }
-        function mostrarTicket(d) { const a = new Date(), logoHtml = TIENDA.logo ? '<img src="' + TIENDA.logo + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'">' : NOMBRE.charAt(0); document.getElementById('ticket-contenido').innerHTML = '<div class="ticket-header"><div class="ticket-logo">' + logoHtml + '</div><div class="ticket-business">' + NOMBRE + '</div><div class="ticket-rif">RIF: ' + RIF + '</div><small style="color:#888;">Tu tienda de confianza</small></div><hr class="ticket-divider"><div class="ticket-row"><span>Fecha:</span><span>' + a.toLocaleDateString('es-VE') + '</span></div><div class="ticket-row"><span>Hora:</span><span>' + a.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' }) + '</span></div><hr class="ticket-divider"><div class="ticket-row"><span>Cliente:</span><span>' + d.cliente + '</span></div>' + (d.telefono ? '<div class="ticket-row"><span>Tel:</span><span>' + d.telefono + '</span></div>' : '') + '<div class="ticket-row"><span>Tipo:</span><span>' + d.tipo + '</span></div><hr class="ticket-divider"><div style="font-size:12px;font-weight:600;color:#888;margin-bottom:6px;">PRODUCTOS</div>' + d.productos.map(p => '<div class="ticket-row"><span>' + p.nombre + ' x' + p.cantidad + '</span><span>' + M + ' ' + fV((p.precio_bs || 0) * p.cantidad) + '</span></div>').join('') + '<hr class="ticket-divider"><div class="ticket-row total"><span>TOTAL ' + M.replace('.', '') + ':</span><span>' + M + ' ' + fV(d.total_bs) + '</span></div>' + (d.total_usd > 0 ? '<div class="ticket-row" style="font-size:12px;color:#888;"><span>TOTAL USD:</span><span>$' + d.total_usd.toFixed(2) + '</span></div>' : '') + '<hr class="ticket-divider"><div style="text-align:center;color:#A78BFA;font-size:13px;margin-top:8px;">¡Gracias por tu compra!</div>'; }
-        function compartirTicket() { const ticketText = document.getElementById('ticket-contenido')?.innerText || 'Ticket SiReBa'; if (navigator.share) { navigator.share({ title: 'Ticket ' + NOMBRE, text: ticketText }).catch(() => {}); } else { navigator.clipboard.writeText(ticketText).then(() => alert('📋 Ticket copiado')).catch(() => tg.sendData('COMPARTIR_TICKET:' + ticketText)); } }
-        function generarReportePersonalizado() { const d = document.getElementById('fecha-desde').value, h = document.getElementById('fecha-hasta').value; if (d && h) webhookAI('reporte', { tipo: 'personalizado', desde: d, hasta: h }, 'response-reporte-pers'); else alert('Selecciona ambas fechas'); }
-        function actualizarExistente() { const co = document.getElementById('act-existente-codigo').value.trim(), ca = document.getElementById('act-existente-cantidad').value.trim(), pu = document.getElementById('act-existente-precio-usd').value.trim(); if (!co || !ca) return alert('Código y cantidad obligatorios'); webhookAI('actualizar_stock', { tipo: 'existente', codigo: co, cantidad: ca, precio_usd: pu || null }, 'response-act-existente'); }
-        function agregarNuevoProducto() { const co = document.getElementById('nuevo-codigo').value.trim(), n = document.getElementById('nuevo-nombre').value.trim(), cat = document.getElementById('nuevo-categoria').value, ca = document.getElementById('nuevo-cantidad').value.trim(), pu = document.getElementById('nuevo-precio-usd').value.trim(); if (!co || !n || !cat || !ca || !pu) return alert('Todos los campos obligatorios'); webhookAI('actualizar_stock', { tipo: 'nuevo', codigo: co, nombre: n, categoria: cat, cantidad: ca, precio_usd: pu }, 'response-nuevo'); }
-        async function cargarProductosModificar() { const lista = document.getElementById('producto-modificar-lista'); try { const snap = await db.collection('productos').get(); const prods = []; snap.forEach(d => prods.push({ id: d.id, ...d.data() })); if (!prods.length) { lista.innerHTML = '<div class="empty-state">No hay productos</div>'; return; } lista.innerHTML = '<div class="search-box"><span class="search-icon">🔍</span><input type="text" class="form-input" placeholder="Buscar..." oninput="filtrarProductosModificar()"></div><div id="modificar-lista-items">' + prods.map(p => '<div class="product-item" data-nombre="' + (p.nombre || '').toLowerCase() + '" data-codigo="' + (p.codigo || '').toLowerCase() + '"><div class="product-info"><div class="product-name">' + (p.nombre || p.id) + '</div><div class="product-stock">Código: ' + (p.codigo || 'N/A') + ' | Stock: ' + (p.stock || 0) + '</div></div><button class="add-btn" onclick="abrirFormModificarProducto(\'' + p.id + '\')">✏️</button></div>').join('') + '</div>'; window._modificarProds = prods; } catch (e) { lista.innerHTML = '<div class="empty-state">Error</div>'; } }
-        function filtrarProductosModificar() { const b = document.getElementById('modificar-buscar')?.value?.toLowerCase() || ''; document.querySelectorAll('#modificar-lista-items .product-item').forEach(item => { item.style.display = (item.dataset.nombre || '').includes(b) || (item.dataset.codigo || '').includes(b) ? 'flex' : 'none'; }); }
-        function abrirFormModificarProducto(id) { const p = (window._modificarProds || []).find(x => x.id === id); if (!p) return; document.getElementById('modificar-id').value = p.id; document.getElementById('modificar-codigo').value = p.codigo || ''; document.getElementById('modificar-nombre').value = p.nombre || ''; document.getElementById('modificar-categoria').value = p.categoria || ''; document.getElementById('modificar-stock').value = p.stock || p.cantidad || 0; document.getElementById('modificar-precio-usd').value = p.precio_usd || ''; document.getElementById('modificar-precio-bs').value = p.precio_bs || ''; document.getElementById('response-modificar-prod').innerHTML = ''; navigateTo('producto-modificar-form'); }
-        async function guardarModificacionProducto() { const id = document.getElementById('modificar-id').value; const datos = { codigo: document.getElementById('modificar-codigo').value.trim(), nombre: document.getElementById('modificar-nombre').value.trim(), categoria: document.getElementById('modificar-categoria').value, stock: parseInt(document.getElementById('modificar-stock').value) || 0, precio_usd: parseFloat(document.getElementById('modificar-precio-usd').value) || 0, precio_bs: parseFloat(document.getElementById('modificar-precio-bs').value) || 0 }; if (!datos.nombre) return alert('El nombre es obligatorio'); await db.collection('productos').doc(id).update(datos); const result = await webhookAI('actualizar_stock', { tipo: 'modificar', producto_id: id, ...datos }, 'response-modificar-prod'); if (result) { setTimeout(() => navigateTo('producto-modificar'), 1500); } }
-        function ajustarTasa() { const t = document.getElementById('nueva-tasa').value.trim(); if (!t) return alert('Ingresa la tasa'); tasaActual = parseFloat(t); db.collection('config').doc('tasa').set({ valor: parseFloat(t), fecha: new Date() }); webhookAI('ajustar_tasa', { tasa: t }, 'response-tasa'); }
-        async function cargarCatalogo() { const ct = document.getElementById('catalogo-contenido'); ct.innerHTML = '<div class="empty-state">Cargando...</div>'; try { const snap = await db.collection('productos').get(); const prods = []; snap.forEach(d => prods.push({ id: d.id, ...d.data() })); if (!prods.length) { ct.innerHTML = '<div class="empty-state">No hay productos</div>'; return; } ct.innerHTML = prods.map(p => '<div class="product-item"><div class="product-info"><div class="product-name">' + (p.nombre || p.id) + '</div><div class="product-price">' + M + ' ' + fV(p.precio_bs || 0) + (p.precio_usd ? ' | $' + p.precio_usd.toFixed(2) : '') + '</div><div class="product-stock">Stock: ' + (p.stock || p.cantidad || 0) + ' | Código: ' + (p.codigo || 'N/A') + '</div><span class="badge">' + (p.categoria || 'Sin categoría') + '</span></div></div>').join(''); } catch (e) { ct.innerHTML = '<div class="empty-state">Error</div>'; } }
-        async function cargarCobros() { const ct = document.getElementById('cobros-contenido'); ct.innerHTML = '<div class="empty-state">Cargando...</div>'; try { const snap = await db.collection('creditos').where('estado', '==', 'pendiente').get(); const deu = []; snap.forEach(d => { const data = d.data(); deu.push({ id: d.id, cliente: data.cliente_nombre, telefono: data.cliente_whatsapp, deuda: data.total_bs, deuda_usd: data.total_usd }); }); if (!deu.length) { ct.innerHTML = '<div class="empty-state">🎉 No hay cuentas por cobrar</div>'; return; } ct.innerHTML = deu.map(d => '<div class="product-item"><div class="product-info"><div class="product-name">👤 ' + (d.cliente || 'Sin nombre') + '</div><div class="product-price" style="color:#F59E0B;">Debe: ' + M + ' ' + fV(d.deuda || 0) + '</div>' + (d.deuda_usd > 0 ? '<div class="product-price-usd">$' + Number(d.deuda_usd).toFixed(2) + '</div>' : '') + '<div class="product-stock">📱 ' + (d.telefono || 'Sin teléfono') + '</div></div><button class="add-btn" style="background:#10B981;" onclick="cobrarCredito(\'' + d.id + '\',\'' + (d.cliente || '').replace(/'/g, "\\'") + '\',' + (d.deuda || 0) + ')">💰 Pago</button></div>').join(''); } catch (e) { try { const snap2 = await db.collection('creditos').get(); const deu2 = []; snap2.forEach(d => { const data = d.data(); if (data.estado === 'pendiente') deu2.push({ id: d.id, cliente: data.cliente_nombre, telefono: data.cliente_whatsapp, deuda: data.total_bs, deuda_usd: data.total_usd }); }); if (!deu2.length) { ct.innerHTML = '<div class="empty-state">🎉 No hay cuentas por cobrar</div>'; return; } ct.innerHTML = deu2.map(d => '<div class="product-item"><div class="product-info"><div class="product-name">👤 ' + (d.cliente || 'Sin nombre') + '</div><div class="product-price" style="color:#F59E0B;">Debe: ' + M + ' ' + fV(d.deuda || 0) + '</div>' + (d.deuda_usd > 0 ? '<div class="product-price-usd">$' + Number(d.deuda_usd).toFixed(2) + '</div>' : '') + '<div class="product-stock">📱 ' + (d.telefono || 'Sin teléfono') + '</div></div><button class="add-btn" style="background:#10B981;" onclick="cobrarCredito(\'' + d.id + '\',\'' + (d.cliente || '').replace(/'/g, "\\'") + '\',' + (d.deuda || 0) + ')">💰 Cobrar</button></div>').join(''); } catch (e2) { ct.innerHTML = '<div class="empty-state">Error</div>'; } } }
-        async function cobrarCredito(id, cliente, deuda) { if (!confirm('¿Confirmar cobro de ' + cliente + ' por ' + M + ' ' + fV(deuda) + '?')) return; const result = await webhookAI('cobrar', { credito_id: id, cliente, monto: deuda }, null); if (result) { await db.collection('creditos').doc(id).update({ estado: 'pagado' }); cargarCobros(); } else { await db.collection('creditos').doc(id).update({ estado: 'pagado' }); cargarCobros(); } }
-        function agregarProveedor() { const n = document.getElementById('prov-nombre').value.trim(); if (!n) return alert('Nombre obligatorio'); const t = document.getElementById('prov-telefono').value.trim(), c = document.getElementById('prov-correo').value.trim(), pr = document.getElementById('prov-productos').value.trim(), nt = document.getElementById('prov-notas').value.trim(); db.collection('proveedores').add({ nombre: n, telefono: t, correo: c, productos: pr, notas: nt, fechaCreacion: new Date() }); webhookAI('proveedor', { tipo: 'agregar', nombre: n, telefono: t, correo: c, productos: pr }, 'response-prov'); }
-        async function cargarProveedoresModificar() { const ct = document.getElementById('proveedor-modificar-contenido'); try { const snap = await db.collection('proveedores').get(); const provs = []; snap.forEach(d => provs.push({ id: d.id, ...d.data() })); if (!provs.length) { ct.innerHTML = '<div class="empty-state">No hay proveedores</div>'; return; } window._modificarProvs = provs; ct.innerHTML = '<div class="search-box"><span class="search-icon">🔍</span><input type="text" class="form-input" placeholder="Buscar..." id="prov-mod-buscar" oninput="filtrarProveedores()"></div>' + provs.map(p => '<div class="product-item" data-nombre="' + (p.nombre || '').toLowerCase() + '"><div class="product-info"><div class="product-name">' + p.nombre + '</div><div class="product-stock">📱 ' + (p.telefono || 'N/A') + ' | ✉️ ' + (p.correo || 'N/A') + '</div></div><button class="add-btn" onclick="abrirFormModificarProveedor(\'' + p.id + '\')">✏️</button></div>').join(''); } catch (e) { ct.innerHTML = '<div class="empty-state">Error</div>'; } }
-        function filtrarProveedores() { const b = document.getElementById('prov-mod-buscar')?.value?.toLowerCase() || ''; document.querySelectorAll('#proveedor-modificar-contenido .product-item').forEach(item => { item.style.display = (item.dataset.nombre || '').includes(b) ? 'flex' : 'none'; }); }
-        function abrirFormModificarProveedor(id) { const p = (window._modificarProvs || []).find(x => x.id === id); if (!p) return; document.getElementById('modificar-prov-id').value = p.id; document.getElementById('modificar-prov-nombre').value = p.nombre || ''; document.getElementById('modificar-prov-telefono').value = p.telefono || ''; document.getElementById('modificar-prov-correo').value = p.correo || ''; document.getElementById('modificar-prov-productos').value = p.productos || ''; document.getElementById('modificar-prov-notas').value = p.notas || ''; document.getElementById('response-modificar-prov').innerHTML = ''; navigateTo('proveedor-modificar-form'); }
-        async function guardarModificacionProveedor() { const id = document.getElementById('modificar-prov-id').value; const datos = { nombre: document.getElementById('modificar-prov-nombre').value.trim(), telefono: document.getElementById('modificar-prov-telefono').value.trim(), correo: document.getElementById('modificar-prov-correo').value.trim(), productos: document.getElementById('modificar-prov-productos').value.trim(), notas: document.getElementById('modificar-prov-notas').value.trim() }; if (!datos.nombre) return alert('El nombre es obligatorio'); await db.collection('proveedores').doc(id).update(datos); const result = await webhookAI('proveedor', { tipo: 'modificar', id, ...datos }, 'response-modificar-prov'); if (result) { setTimeout(() => navigateTo('proveedor-modificar'), 1500); } }
-        async function cargarProveedoresEliminar() { const ct = document.getElementById('proveedor-eliminar-contenido'); try { const snap = await db.collection('proveedores').get(); const provs = []; snap.forEach(d => provs.push({ id: d.id, ...d.data() })); if (!provs.length) { ct.innerHTML = '<div class="empty-state">No hay proveedores</div>'; return; } ct.innerHTML = provs.map(p => '<div class="product-item"><div class="product-info"><div class="product-name">' + p.nombre + '</div></div><button class="add-btn" style="background:#EF4444;" onclick="if(confirm(\'¿Eliminar ' + (p.nombre || '').replace(/'/g, "\\'") + '?\'))eliminarProveedor(\'' + p.id + '\')">🗑️</button></div>').join(''); } catch (e) { ct.innerHTML = '<div class="empty-state">Error</div>'; } }
-        function eliminarProveedor(id) { db.collection('proveedores').doc(id).delete(); webhookAI('proveedor', { tipo: 'eliminar', id }); cargarProveedoresEliminar(); }
-        async function cargarProductosEliminar() { const lista = document.getElementById('eliminar-lista'); try { const snap = await db.collection('productos').get(); const prods = []; snap.forEach(d => prods.push({ id: d.id, ...d.data() })); lista.innerHTML = prods.map(p => '<div class="product-item"><div class="product-info"><div class="product-name">' + (p.nombre || p.id) + '</div><div class="product-stock">Código: ' + (p.codigo || 'N/A') + '</div></div><button class="add-btn" style="background:#EF4444;" onclick="if(confirm(\'¿Eliminar ' + (p.nombre || p.id).replace(/'/g, "\\'") + '?\'))eliminarProducto(\'' + p.id + '\')">🗑️</button></div>').join(''); } catch (e) { lista.innerHTML = '<div class="empty-state">Error</div>'; } }
-        function eliminarProducto(id) { db.collection('productos').doc(id).delete(); webhookAI('eliminar_producto', { producto_id: id }); cargarProductosEliminar(); }
-        function filtrarProductosEliminar() { const b = document.getElementById('eliminar-buscar')?.value?.toLowerCase() || ''; document.querySelectorAll('#eliminar-lista .product-item').forEach(item => { item.style.display = item.textContent.toLowerCase().includes(b) ? 'flex' : 'none'; }); }
-        (async function() { try { const d = await db.collection('config').doc('tasa').get(); if (d.exists) tasaActual = d.data().valor; } catch (e) {} })();
+        
+        // Inicializar
+        log('🟢 App lista');
+        log(`Métodos disponibles: ${methods.length}`);
     </script>
 </body>
 </html>
