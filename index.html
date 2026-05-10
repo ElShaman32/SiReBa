@@ -36,6 +36,241 @@
     
     .logo-img {
         width: 180px;
+
+        <!-- 🎵 AHORA SUENA - CAMBUR QUE MADURA -->
+<style>
+    .now-playing-section {
+        padding: 50px 20px;
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
+    }
+    
+    .section-title {
+        font-size: 28px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 40px;
+        color: #FFFFFF;
+        position: relative;
+    }
+    
+    .section-title::after {
+        content: '';
+        display: block;
+        width: 60px;
+        height: 4px;
+        background: #7CB342;
+        margin: 10px auto 0;
+        border-radius: 2px;
+    }
+    
+    /* El cambur flotante */
+    .cambur-container {
+        position: relative;
+        width: 160px;
+        height: 180px;
+        margin: 0 auto 25px;
+        cursor: pointer;
+    }
+    
+    .cambur-fruit {
+        font-size: 100px;
+        transition: all 1s ease;
+        animation: float 3s ease-in-out infinite;
+        filter: drop-shadow(0 0 25px rgba(124, 179, 66, 0.4));
+        line-height: 1;
+    }
+    
+    .cambur-fruit.maduro {
+        filter: drop-shadow(0 0 35px rgba(255, 215, 0, 0.6));
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    
+    /* Gotitas de frescura (solo visible cuando está verde) */
+    .gotitas {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 18px;
+        opacity: 0.7;
+        transition: opacity 0.5s;
+    }
+    
+    .gotitas.oculto {
+        opacity: 0;
+    }
+    
+    /* Brillo cuando está maduro */
+    .brillo {
+        position: absolute;
+        top: 15px;
+        right: 25px;
+        font-size: 20px;
+        opacity: 0;
+        transition: opacity 0.5s;
+    }
+    
+    .brillo.visible {
+        opacity: 1;
+        animation: sparkle 0.8s infinite;
+    }
+    
+    @keyframes sparkle {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 1; }
+    }
+    
+    /* Lentes de sol cuando está pintón */
+    .lentes {
+        position: absolute;
+        top: 35px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 30px;
+        opacity: 0;
+        transition: opacity 0.5s;
+    }
+    
+    .lentes.visible {
+        opacity: 1;
+    }
+    
+    /* Info de la canción */
+    .song-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #FFFFFF;
+        margin-bottom: 5px;
+    }
+    
+    .song-artist {
+        font-size: 16px;
+        color: #A5D6A7;
+        margin-bottom: 20px;
+    }
+    
+    /* Botones de acción */
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .btn-action {
+        padding: 10px 22px;
+        border-radius: 25px;
+        border: 2px solid rgba(124, 179, 66, 0.4);
+        background: transparent;
+        color: #A5D6A7;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    
+    .btn-action:hover {
+        background: rgba(124, 179, 66, 0.15);
+        border-color: #7CB342;
+        color: #FFFFFF;
+    }
+</style>
+
+<section class="now-playing-section">
+    <h2 class="section-title">🎵 Ahora Suena</h2>
+    
+    <div class="cambur-container" id="camburContainer" title="Este cambur madura con la música 🍌">
+        <span class="gotitas" id="gotitas">💧</span>
+        <span class="cambur-fruit" id="camburFruit">🍌</span>
+        <span class="brillo" id="brillo">✨</span>
+        <span class="lentes" id="lentes">😎</span>
+    </div>
+    
+    <div class="song-title" id="songTitle">Conectando...</div>
+    <div class="song-artist" id="songArtist">Sintonizando Cambur Pintón</div>
+    
+    <div class="action-buttons">
+        <button class="btn-action" onclick="shareNowPlaying()">📤 Compartir</button>
+        <button class="btn-action" onclick="requestSong()">📋 Pedir Canción</button>
+    </div>
+</section>
+
+<script>
+    // ─── CONTROL DEL CAMBUR QUE MADURA ───
+    const camburFruit = document.getElementById('camburFruit');
+    const gotitas = document.getElementById('gotitas');
+    const brillo = document.getElementById('brillo');
+    const lentes = document.getElementById('lentes');
+    
+    let maduro = false;
+    let madurarTimer = null;
+    
+    function madurarCambur() {
+        if (maduro) return;
+        maduro = true;
+        camburFruit.classList.add('maduro');
+        gotitas.classList.add('oculto');
+        brillo.classList.add('visible');
+        lentes.classList.add('visible');
+        camburFruit.title = '¡Cambur Pintón! 🍌😎';
+    }
+    
+    function verdeCambur() {
+        maduro = false;
+        camburFruit.classList.remove('maduro');
+        gotitas.classList.remove('oculto');
+        brillo.classList.remove('visible');
+        lentes.classList.remove('visible');
+        camburFruit.title = 'El cambur está madurando... 🍌💧';
+    }
+    
+    // Madurar al poner play
+    const observer = new MutationObserver(() => {
+        const btn = document.getElementById('playBtn');
+        if (btn && btn.classList.contains('playing')) {
+            // Madurar en 3 segundos
+            if (madurarTimer) clearTimeout(madurarTimer);
+            madurarTimer = setTimeout(madurarCambur, 3000);
+        } else {
+            if (madurarTimer) clearTimeout(madurarTimer);
+            verdeCambur();
+        }
+    });
+    
+    // Observar cambios en el botón de play
+    setTimeout(() => {
+        const playBtn = document.getElementById('playBtn');
+        if (playBtn) {
+            observer.observe(playBtn, { attributes: true, attributeFilter: ['class'] });
+        }
+    }, 500);
+    
+    // También madurar al hacer clic en el cambur
+    document.getElementById('camburContainer').addEventListener('click', () => {
+        if (maduro) {
+            verdeCambur();
+        } else {
+            madurarCambur();
+        }
+    });
+    
+    // Actualizar metadatos (se conecta con la API después)
+    function updateNowPlaying(data) {
+        const titleEl = document.getElementById('songTitle');
+        const artistEl = document.getElementById('songArtist');
+        if (data && data.now_playing && data.now_playing.song) {
+            const song = data.now_playing.song;
+            titleEl.textContent = song.title || 'Música en vivo';
+            artistEl.textContent = song.artist || 'Cambur Pintón';
+        }
+    }
+</script>
         height: auto;
         max-width: 100%;
         filter: drop-shadow(0 0 30px rgba(124, 179, 66, 0.5));
