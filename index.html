@@ -1,824 +1,119 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#1A1A2E">
-    <meta name="description" content="Cambur Pintón - La Radio Más Chevere de Venezuela. Música venezolana en todos los géneros, 24/7.">
-    <meta property="og:title" content="Cambur Pintón - La Radio Más Chevere de Venezuela">
-    <meta property="og:description" content="80% música venezolana, 20% internacional. ¡El cambur está maduro y listo para sonar!">
-    <meta property="og:image" content="https://radio.camburpinton.com.ve/logo_radio.png">
-    <meta property="og:type" content="music.radio_station">
-    <title>🍌 Cambur Pintón - La Radio Más Chevere de Venezuela</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root {
-            --bg: #1A1A2E;
-            --surface: #16213E;
-            --cambur-yellow: #FFD700;
-            --cambur-green: #7CB342;
-            --coral: #FF6B6B;
-            --wood-dark: #5D3A1A;
-            --wood-light: #8B5E3C;
-            --text: #FFFFFF;
-            --text-secondary: #B8B8D0;
-            --border: rgba(255, 255, 255, 0.1);
-            --string1: #FFD700;
-            --string2: #FF8C00;
-            --string3: #FF4500;
-            --string4: #8B0000;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            --radius: 16px;
-            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+<!-- 🍌 HERO PINTÓN - VERSIÓN FINAL -->
+<style>
+    .hero {
+        text-align: center;
+        padding: 60px 20px 100px;
+        background: linear-gradient(180deg, #0D2818 0%, #1A1A2E 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Detalles de hojas tropicales de fondo (sutiles) */
+    .hero::before {
+        content: '🍌 🎸 🍌 🎸 🍌';
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 40px;
+        opacity: 0.08;
+        white-space: nowrap;
+        letter-spacing: 30px;
+    }
+    
+    .logo-container {
+        cursor: pointer;
+        user-select: none;
+        display: inline-block;
+        transition: transform 0.2s;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .logo-container:active {
+        transform: scale(0.95);
+    }
+    
+    .logo-img {
+        width: 180px;
+        height: auto;
+        max-width: 100%;
+        filter: drop-shadow(0 0 30px rgba(124, 179, 66, 0.5));
+        animation: float 3s ease-in-out infinite;
+        border-radius: 50%;
+        border: 3px solid rgba(124, 179, 66, 0.3);
+        background: rgba(13, 40, 24, 0.6);
+        padding: 10px;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .station-name {
+        font-size: 42px;
+        font-weight: 900;
+        margin: 20px 0 10px;
+        background: linear-gradient(45deg, #7CB342, #558B2F, #FFD700);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.2;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .tagline {
+        font-size: 18px;
+        color: #A5D6A7;
+        margin-bottom: 30px;
+        font-style: italic;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .btn-primary {
+        display: inline-block;
+        padding: 16px 40px;
+        background: linear-gradient(135deg, #7CB342, #558B2F);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        box-shadow: 0 4px 20px rgba(124, 179, 66, 0.4);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #8BC34A, #689F38);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(124, 179, 66, 0.6);
+    }
+    
+    /* Responsive */
+    @media (max-width: 600px) {
+        .station-name { font-size: 28px; }
+        .logo-img { width: 120px; }
+        .hero { padding: 40px 15px 80px; }
+    }
+</style>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* ─── PLAYER FLOTANTE ─── */
-        .player-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--surface);
-            border-top: 2px solid var(--cambur-yellow);
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            z-index: 1000;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .player-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 3px solid var(--coral);
-            background: rgba(255, 107, 107, 0.1);
-            color: var(--coral);
-            font-size: 22px;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .player-btn:hover {
-            background: rgba(255, 107, 107, 0.2);
-            transform: scale(1.05);
-        }
-
-        .player-btn.playing {
-            border-color: var(--cambur-yellow);
-            color: var(--cambur-yellow);
-            background: rgba(255, 215, 0, 0.1);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-        }
-
-        .live-indicator {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            font-weight: bold;
-            color: var(--coral);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--coral);
-            border-radius: 50%;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.3;
-            }
-        }
-
-        .now-playing-info {
-            flex: 1;
-            min-width: 150px;
-            text-align: center;
-        }
-
-        .now-playing-title {
-            font-size: 13px;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 250px;
-            margin: 0 auto;
-        }
-
-        .now-playing-artist {
-            font-size: 11px;
-            color: var(--text-secondary);
-        }
-
-        /* ─── STRINGS ANIMATION ─── */
-        .strings-container {
-            display: flex;
-            gap: 3px;
-            height: 20px;
-            align-items: flex-end;
-        }
-
-        .string {
-            width: 2px;
-            border-radius: 1px;
-            transition: height 0.1s;
-        }
-
-        .string-1 {
-            background: var(--string1);
-        }
-        .string-2 {
-            background: var(--string2);
-        }
-        .string-3 {
-            background: var(--string3);
-        }
-        .string-4 {
-            background: var(--string4);
-        }
-
-        /* ─── HERO ─── */
-        .hero {
-            text-align: center;
-            padding: 60px 20px 100px;
-        }
-
-        .logo-container {
-            cursor: pointer;
-            user-select: none;
-            display: inline-block;
-            transition: transform 0.2s;
-        }
-
-        .logo-container:active {
-            transform: scale(0.95);
-        }
-
-        .logo-img {
-            width: 180px;
-            height: auto;
-            max-width: 100%;
-            filter: drop-shadow(0 8px 24px rgba(255, 215, 0, 0.3));
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        .station-name {
-            font-size: 42px;
-            font-weight: 900;
-            margin: 20px 0 10px;
-            background: linear-gradient(45deg, var(--cambur-yellow), var(--cambur-green), var(--coral));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1.2;
-        }
-
-        .tagline {
-            font-size: 18px;
-            color: var(--text-secondary);
-            margin-bottom: 30px;
-            font-style: italic;
-        }
-
-        .btn-primary {
-            display: inline-block;
-            padding: 16px 40px;
-            background: var(--coral);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition);
-            text-decoration: none;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-        }
-
-        .btn-primary:hover {
-            background: #ff5252;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
-        }
-
-        /* ─── SECCIONES ─── */
-        section {
-            padding: 50px 20px;
-            max-width: 900px;
-            margin: 0 auto 30px;
-        }
-
-        .section-title {
-            font-size: 28px;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        .section-title::after {
-            content: '';
-            display: block;
-            width: 60px;
-            height: 4px;
-            background: var(--cambur-yellow);
-            margin: 10px auto 0;
-            border-radius: 2px;
-        }
-
-        /* ─── NOW PLAYING CARD ─── */
-        .now-playing-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 30px;
-            text-align: center;
-            box-shadow: var(--shadow);
-        }
-
-        .album-art {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            background: linear-gradient(135deg, var(--cambur-yellow), var(--coral));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
-            animation: spin 10s linear infinite;
-            animation-play-state: paused;
-            border: 3px solid var(--cambur-yellow);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
-        }
-
-        .album-art.spinning {
-            animation-play-state: running;
-        }
-
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .song-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .song-artist {
-            font-size: 16px;
-            color: var(--text-secondary);
-            margin-bottom: 15px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn-action {
-            padding: 10px 20px;
-            border-radius: 25px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--text);
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 14px;
-        }
-
-        .btn-action:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* ─── PROGRAMACIóN ─── */
-        .schedule-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .schedule-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-            text-align: center;
-        }
-
-        .schedule-day {
-            font-weight: 700;
-            color: var(--cambur-yellow);
-            font-size: 16px;
-        }
-
-        .schedule-show {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-top: 5px;
-        }
-
-        .schedule-time {
-            font-size: 12px;
-            color: var(--coral);
-            font-weight: 600;
-        }
-
-        /* ─── COMUNIDAD ─── */
-        .community-box {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 30px;
-            text-align: center;
-        }
-
-        .telegram-embed {
-            border-radius: var(--radius);
-            overflow: hidden;
-            border: 1px solid var(--border);
-            height: 400px;
-            width: 100%;
-        }
-
-        /* ─── CONECTA ─── */
-        .social-grid {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .social-btn {
-            padding: 12px 25px;
-            border-radius: 25px;
-            border: 2px solid var(--cambur-yellow);
-            background: transparent;
-            color: var(--cambur-yellow);
-            cursor: pointer;
-            transition: var(--transition);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .social-btn:hover {
-            background: var(--cambur-yellow);
-            color: var(--bg);
-        }
-
-        /* ─── TOAST EASTER EGG ─── */
-        .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--cambur-yellow);
-            color: var(--bg);
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-weight: 700;
-            z-index: 9999;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
-
-        .toast.show {
-            opacity: 1;
-        }
-
-        /* ─── FOOTER ─── */
-        footer {
-            text-align: center;
-            padding: 30px 20px 120px;
-            color: var(--text-secondary);
-            font-size: 13px;
-        }
-
-        footer a {
-            color: var(--cambur-yellow);
-            text-decoration: none;
-        }
-
-        /* ─── RESPONSIVE ─── */
-        @media (max-width: 600px) {
-            .station-name {
-                font-size: 28px;
-            }
-            .player-bar {
-                padding: 10px;
-                gap: 8px;
-            }
-            .now-playing-title {
-                max-width: 150px;
-                font-size: 11px;
-            }
-            .logo-img {
-                width: 120px;
-            }
-            .hero {
-                padding: 40px 15px 80px;
-            }
-            section {
-                padding: 30px 15px;
-            }
-        }
-
-        /* ─── MODO CLARO (opcional, se detecta del sistema) ─── */
-        @media (prefers-color-scheme: light) {
-            :root {
-                --bg: #FFF8E7;
-                --surface: #FFFFFF;
-                --text: #1A1A2E;
-                --text-secondary: #5D5D7A;
-                --border: rgba(0, 0, 0, 0.1);
-            }
-            .player-bar {
-                border-top-color: var(--wood-dark);
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <!-- TOAST EASTER EGG -->
-    <div id="toast" class="toast">🍌 ¡CAM-BUR-PIN-TÓN! 🎸</div>
-
-    <!-- HEADER / HERO -->
-    <header class="hero">
-        <div class="logo-container" id="logoContainer" title="Haz clic 4 veces para el easter egg...">
-            <img src="https://radio.camburpinton.com.ve/logo_radio.png" alt="Cambur Pintón" class="logo-img" id="logoImg">
-        </div>
-        <h1 class="station-name">Cambur Pintón</h1>
-        <p class="tagline">🎙️ La Radio Más Chevere de Venezuela 🎙️</p>
-        <button class="btn-primary" onclick="scrollToPlayer()">🎧 ¡ESCUCHAR EN VIVO!</button>
-    </header>
-
-    <!-- AHORA SUENA -->
-    <section id="ahora-suena">
-        <h2 class="section-title">🎵 Ahora Suena</h2>
-        <div class="now-playing-card">
-            <div class="album-art" id="albumArt">📻</div>
-            <div class="song-title" id="songTitle">Cargando...</div>
-            <div class="song-artist" id="songArtist">Conectando con la radio</div>
-            <div class="action-buttons">
-                <button class="btn-action" onclick="shareNowPlaying()">📤 Compartir</button>
-                <button class="btn-action" onclick="requestSong()">📋 Pedir Canción</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- PROGRAMACIÓN -->
-    <section id="programacion">
-        <h2 class="section-title">📅 Programación</h2>
-        <div class="schedule-grid">
-            <div class="schedule-card">
-                <div class="schedule-day">Lunes a Viernes</div>
-                <div class="schedule-show">🎵 Música Continua</div>
-                <div class="schedule-time">Todo el día</div>
-            </div>
-            <div class="schedule-card">
-                <div class="schedule-day">Sábados</div>
-                <div class="schedule-show">🎉 Especial Sabroso</div>
-                <div class="schedule-time">Próximamente</div>
-            </div>
-            <div class="schedule-card">
-                <div class="schedule-day">Domingos</div>
-                <div class="schedule-show">🍌 Domingo Pintón</div>
-                <div class="schedule-time">Próximamente</div>
-            </div>
-        </div>
-        <p style="text-align:center; margin-top:20px; color:var(--text-secondary); font-style:italic;">
-            🚧 Estamos en construcción. ¡Pronto tendremos shows en vivo con locutores!
-        </p>
-    </section>
-
-    <!-- COMUNIDAD -->
-    <section id="comunidad">
-        <h2 class="section-title">💬 Comunidad Cambur</h2>
-        <div class="community-box">
-            <p style="margin-bottom:20px;">Únete a nuestro chat de oyentes en Telegram</p>
-            <a href="https://t.me/CAMBURPINTON" target="_blank" rel="noopener" class="btn-primary" style="display:inline-block;margin-bottom:20px;">
-                💬 Unirme al Chat
-            </a>
-            <p style="font-size:13px;color:var(--text-secondary);">
-                Comparte con otros oyentes, pide canciones y entérate de todo.
-            </p>
-        </div>
-    </section>
-
-    <!-- CONECTA -->
-    <section id="conecta">
-        <h2 class="section-title">📲 Conecta con Nosotros</h2>
-        <div class="social-grid">
-            <a href="https://t.me/CAMBURPINTON" target="_blank" rel="noopener" class="social-btn">📱 Telegram</a>
-            <a href="https://instagram.com/camburpinton" target="_blank" rel="noopener" class="social-btn">📸 Instagram</a>
-            <a href="https://tiktok.com/@camburpinton" target="_blank" rel="noopener" class="social-btn">🎵 TikTok</a>
-        </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer>
-        <p>© 2026 <strong>Cambur Pintón</strong> - La Radio Más Chevere de Venezuela 🍌</p>
-        <p>Hecho con ❤️ y mucho sabor tropical</p>
-    </footer>
-
-    <!-- PLAYER FLOTANTE -->
-    <div class="player-bar" id="playerBar">
-        <button class="player-btn" id="playBtn" onclick="togglePlay()" title="Reproducir / Pausar">▶</button>
-        <div class="live-indicator">
-            <div class="live-dot"></div> EN VIVO
-        </div>
-        <div class="now-playing-info">
-            <div class="now-playing-title" id="barTitle">Cambur Pintón</div>
-            <div class="now-playing-artist" id="barArtist">Escuchando</div>
-        </div>
-        <div class="strings-container" id="stringsContainer">
-            <div class="string string-1" style="height:10px"></div>
-            <div class="string string-2" style="height:10px"></div>
-            <div class="string string-3" style="height:10px"></div>
-            <div class="string string-4" style="height:10px"></div>
-        </div>
+<header class="hero">
+    <div class="logo-container" id="logoContainer" title="Haz clic 4 veces para el easter egg... 🍌🎸">
+        <img src="https://radio.camburpinton.com.ve/static/uploads/background.1778449035.png" alt="Cambur Pintón" class="logo-img" id="logoImg">
     </div>
-
-    <script>
-        // ─── CONFIGURACIÓN ───
-        const STREAM_URL = 'https://radio.camburpinton.com.ve/listen/cambur_pinton/radio.mp3';
-        const API_URL = 'https://radio.camburpinton.com.ve/api/nowplaying/cambur_pinton';
-        const API_KEY = '0aebf59628850e87:30b9574cf088d2e1bd100a8c96e87e98';
-
-        // ─── ELEMENTOS DOM ───
-        const playBtn = document.getElementById('playBtn');
-        const albumArt = document.getElementById('albumArt');
-        const songTitle = document.getElementById('songTitle');
-        const songArtist = document.getElementById('songArtist');
-        const barTitle = document.getElementById('barTitle');
-        const barArtist = document.getElementById('barArtist');
-        const stringsContainer = document.getElementById('stringsContainer');
-        const toast = document.getElementById('toast');
-        const logoContainer = document.getElementById('logoContainer');
-
-        // ─── AUDIO ───
-        let audio = null;
-        let isPlaying = false;
-        let stringsInterval = null;
-        let nowPlayingInterval = null;
-
-        function togglePlay() {
-            if (isPlaying) {
-                pauseAudio();
-            } else {
-                playAudio();
-            }
-        }
-
-        function playAudio() {
-            if (!audio) {
-                audio = new Audio(STREAM_URL);
-                audio.volume = 0.8;
-                audio.preload = 'auto';
-                audio.onerror = () => {
-                    isPlaying = false;
-                    updateButton();
-                    stopStrings();
-                };
-                audio.onended = () => {
-                    if (isPlaying) {
-                        playAudio();
-                    }
-                };
-            }
-            audio.play().then(() => {
-                isPlaying = true;
-                updateButton();
-                startStrings();
-                albumArt.classList.add('spinning');
-            }).catch(err => {
-                console.error('Error al reproducir:', err);
-                isPlaying = false;
-                updateButton();
-            });
-        }
-
-        function pauseAudio() {
-            if (audio) {
-                audio.pause();
-                audio.src = '';
-                audio = null;
-            }
-            isPlaying = false;
-            updateButton();
-            stopStrings();
-            albumArt.classList.remove('spinning');
-        }
-
-        function updateButton() {
-            if (isPlaying) {
-                playBtn.textContent = '⏸';
-                playBtn.classList.add('playing');
-            } else {
-                playBtn.textContent = '▶';
-                playBtn.classList.remove('playing');
-            }
-        }
-
-        // ─── ANIMACIÓN DE CUERDAS ───
-        function startStrings() {
-            stopStrings();
-            stringsInterval = setInterval(() => {
-                const strings = stringsContainer.querySelectorAll('.string');
-                strings.forEach(s => {
-                    const h = Math.random() * 16 + 4;
-                    s.style.height = h + 'px';
-                });
-            }, 100);
-        }
-
-        function stopStrings() {
-            if (stringsInterval) {
-                clearInterval(stringsInterval);
-                stringsInterval = null;
-            }
-            const strings = stringsContainer.querySelectorAll('.string');
-            strings.forEach(s => s.style.height = '5px');
-        }
-
-        // ─── API: NOW PLAYING ───
-        async function fetchNowPlaying() {
-            try {
-                const response = await fetch(API_URL, {
-                    headers: {
-                        'Authorization': 'Basic ' + btoa(API_KEY)
-                    }
-                });
-                if (!response.ok) throw new Error('API error');
-                const data = await response.json();
-                updateNowPlaying(data);
-            } catch (err) {
-                console.error('Error fetching now playing:', err);
-                songTitle.textContent = 'Cambur Pintón';
-                songArtist.textContent = 'La Radio Más Chevere';
-                barTitle.textContent = 'Cambur Pintón';
-                barArtist.textContent = 'Sintoniza en vivo';
-            }
-        }
-
-        function updateNowPlaying(data) {
-            if (data && data.now_playing && data.now_playing.song) {
-                const song = data.now_playing.song;
-                const title = song.title || 'Música en vivo';
-                const artist = song.artist || 'Cambur Pintón';
-                songTitle.textContent = title;
-                songArtist.textContent = artist;
-                barTitle.textContent = title;
-                barArtist.textContent = artist;
-                albumArt.textContent = '🎵';
-            } else {
-                songTitle.textContent = 'Música en vivo';
-                songArtist.textContent = 'Cambur Pintón';
-                barTitle.textContent = 'Cambur Pintón';
-                barArtist.textContent = 'Escuchando';
-                albumArt.textContent = '📻';
-            }
-        }
-
-        // Iniciar polling de metadatos
-        nowPlayingInterval = setInterval(fetchNowPlaying, 15000);
-        fetchNowPlaying();
-
-        // ─── EASTER EGG: 4 CLICS AL LOGO ───
-        let clickCount = 0;
-        let clickTimer = null;
-
-        logoContainer.addEventListener('click', () => {
-            clickCount++;
-            if (clickTimer) clearTimeout(clickTimer);
-            clickTimer = setTimeout(() => {
-                clickCount = 0;
-            }, 2000);
-
-            if (clickCount === 4) {
-                triggerEasterEgg();
-                clickCount = 0;
-            }
-        });
-
-        function triggerEasterEgg() {
-            // Mostrar toast
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2000);
-
-            // Vibrar strings fuerte
-            const strings = stringsContainer.querySelectorAll('.string');
-            strings.forEach(s => {
-                s.style.height = '20px';
-                s.style.transition = 'height 0.3s ease';
-            });
-            setTimeout(() => {
-                strings.forEach(s => {
-                    s.style.height = '5px';
-                    s.style.transition = 'height 0.1s';
-                });
-            }, 500);
-
-            // Agitar el logo
-            const logoImg = document.getElementById('logoImg');
-            logoImg.style.animation = 'none';
-            logoImg.offsetHeight;
-            logoImg.style.animation = 'float 0.3s ease-in-out 3';
-            setTimeout(() => {
-                logoImg.style.animation = 'float 3s ease-in-out infinite';
-            }, 900);
-
-            console.log('🍌 ¡CAM-BUR-PIN-TÓN! 🎸');
-        }
-
-        // ─── UTILIDADES ───
-        function scrollToPlayer() {
-            document.getElementById('playerBar').scrollIntoView({ behavior: 'smooth' });
-            if (!isPlaying) playAudio();
-        }
-
-        function shareNowPlaying() {
-            const title = songTitle.textContent;
-            const artist = songArtist.textContent;
-            const text = `🎵 Estoy escuchando "${title}" de ${artist} en @CamburPintonRadio 🍌 ¡La radio más chevere de Venezuela!`;
-            const url = `https://t.me/share/url?url=${encodeURIComponent('https://camburpinton.com.ve')}&text=${encodeURIComponent(text)}`;
-            window.open(url, '_blank');
-        }
-
-        function requestSong() {
-            window.open('https://t.me/CAMBURPINTON', '_blank');
-        }
-
-        // ─── TELEGRAM MINI APP ───
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-        }
-
-        // ─── LIMPIEZA ───
-        window.addEventListener('beforeunload', () => {
-            if (nowPlayingInterval) clearInterval(nowPlayingInterval);
-            stopStrings();
-        });
-
-        console.log('🍌 Cambur Pintón - Web lista');
-        console.log('🎸 Easter egg: 4 clics en el logo');
-        console.log('📻 Stream:', STREAM_URL);
-    </script>
-</body>
-</html>
+    <h1 class="station-name">Cambur Pintón</h1>
+    <p class="tagline">🎙️ La Radio Más Chevere de Venezuela 🎙️</p>
+    <button class="btn-primary" onclick="document.getElementById('playerBar').scrollIntoView({behavior:'smooth'}); if(!isPlaying) togglePlay();">
+        🎧 ¡ESCUCHAR EN VIVO!
+    </button>
+    <p class="hero-subtitle" style="font-size:15px; color:#A5D6A7; margin-top:15px; font-style:italic; position:relative; z-index:1;">
+        🎸 Con El Cuatro Bien Afinado
+    </p>
+</header>
