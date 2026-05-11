@@ -112,13 +112,14 @@
             padding: 30px 20px;
             max-width: 600px;
             margin: 0 auto;
+            position: relative;
         }
 
         .section-title {
             font-size: 24px;
             font-weight: 800;
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 5px;
             color: #FFFFFF;
         }
 
@@ -136,50 +137,112 @@
             text-align: center;
             font-size: 11px;
             color: #7CB342;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
-        .news-card {
+        .news-carousel {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius);
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-            margin-bottom: 15px;
-            transition: transform 0.2s;
+            min-height: 180px;
         }
 
-        .news-card:active {
-            transform: scale(0.98);
+        .news-slides {
+            display: flex;
+            transition: transform 0.3s ease;
+            width: 100%;
         }
 
-        .news-date {
-            font-size: 11px;
-            color: var(--cambur-green);
-            font-weight: 600;
+        .news-slide {
+            flex: 0 0 100%;
+            padding: 25px 20px;
+            box-sizing: border-box;
+        }
+
+        .news-category {
+            font-size: 13px;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .news-category-icon {
+            font-size: 20px;
         }
 
         .news-title {
-            font-size: 16px;
-            font-weight: 700;
+            font-size: 18px;
+            font-weight: 800;
             color: #FFFFFF;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             line-height: 1.3;
         }
 
         .news-excerpt {
-            font-size: 13px;
+            font-size: 14px;
             color: var(--text-secondary);
-            line-height: 1.5;
+            line-height: 1.6;
         }
+
+        .news-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .news-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(124, 179, 66, 0.3);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .news-dot.active {
+            background: #7CB342;
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .news-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(124, 179, 66, 0.3);
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+
+        .news-nav:active {
+            background: rgba(124, 179, 66, 0.3);
+        }
+
+        .news-nav.prev { left: 5px; }
+        .news-nav.next { right: 5px; }
 
         .news-placeholder {
             text-align: center;
             color: var(--text-secondary);
             font-style: italic;
-            padding: 20px;
+            padding: 30px 20px;
             font-size: 14px;
         }
 
@@ -320,11 +383,11 @@
     📰 NOTICIAS
     ============================================================ -->
     <section class="news-section">
-        <h2 class="section-title">📰 Noticias</h2>
+        <h2 class="section-title">📰 El Pintón News</h2>
+        <div class="news-update-time" id="newsTime"></div>
         
-        <!-- Las noticias se cargarán aquí dinámicamente -->
         <div id="newsContainer">
-            <p class="news-placeholder">🍌 Pronto tendremos noticias frescas...<br>Automatizadas con IA para mantenerte al día</p>
+            <p class="news-placeholder">🍌 Cosechando noticias frescas...</p>
         </div>
     </section>
 
@@ -475,39 +538,111 @@
             }
         }
 
-        // Iniciar actualización de metadatos
         nowPlayingInterval = setInterval(fetchNowPlaying, 15000);
         fetchNowPlaying();
 
         // ─── NOTICIAS DESDE GITHUB ───
+        let currentSlide = 0;
+        let totalSlides = 0;
+
         async function loadNews() {
             const newsContainer = document.getElementById('newsContainer');
+            const newsTime = document.getElementById('newsTime');
+            
             try {
                 const response = await fetch(NEWS_URL);
                 if (!response.ok) throw new Error('No disponible');
                 const data = await response.json();
                 
                 if (data && data.noticias && data.noticias.length > 0) {
-                    const fecha = data.actualizado || 'Reciente';
+                    newsTime.textContent = '📅 ' + (data.actualizado || 'Reciente');
+                    totalSlides = data.noticias.length;
+                    
+                    const slidesHTML = data.noticias.map((item, index) => `
+                        <div class="news-slide">
+                            <div class="news-category">
+                                <span class="news-category-icon">${item.categoria.split(' ')[0]}</span>
+                                ${item.categoria}
+                            </div>
+                            <div class="news-title">${item.titulo}</div>
+                            <div class="news-excerpt">${item.resumen}</div>
+                        </div>
+                    `).join('');
+                    
+                    const dotsHTML = data.noticias.map((_, i) => `
+                        <div class="news-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></div>
+                    `).join('');
                     
                     newsContainer.innerHTML = `
-                        <div class="news-update-time">📅 ${fecha}</div>
-                        ${data.noticias.map(item => `
-                            <div class="news-card">
-                                <div class="news-date">${item.categoria}</div>
-                                <div class="news-title">${item.titulo}</div>
-                                <div class="news-excerpt">${item.resumen}</div>
+                        <div style="position:relative;">
+                            <button class="news-nav prev" onclick="prevSlide()">◀</button>
+                            <div class="news-carousel">
+                                <div class="news-slides" id="newsSlides">
+                                    ${slidesHTML}
+                                </div>
                             </div>
-                        `).join('')}
+                            <button class="news-nav next" onclick="nextSlide()">▶</button>
+                        </div>
+                        <div class="news-dots" id="newsDots">
+                            ${dotsHTML}
+                        </div>
                     `;
+                    
+                    currentSlide = 0;
+                    updateSlides();
+                    
+                    // Soporte para swipe táctil
+                    let touchStartX = 0;
+                    let touchEndX = 0;
+                    
+                    const carousel = document.querySelector('.news-carousel');
+                    
+                    carousel.addEventListener('touchstart', (e) => {
+                        touchStartX = e.changedTouches[0].screenX;
+                    }, {passive: true});
+                    
+                    carousel.addEventListener('touchend', (e) => {
+                        touchEndX = e.changedTouches[0].screenX;
+                        if (touchEndX < touchStartX - 50) nextSlide();
+                        if (touchEndX > touchStartX + 50) prevSlide();
+                    });
                 }
             } catch (err) {
-                console.log('Noticias no disponibles aún. Mostrando placeholder.');
-                // Mantiene el placeholder
+                console.log('Noticias no disponibles aún.');
+                newsTime.textContent = '';
             }
         }
 
-        // Intentar cargar noticias
+        function updateSlides() {
+            const slides = document.getElementById('newsSlides');
+            const dots = document.querySelectorAll('.news-dot');
+            
+            if (slides) {
+                slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+            }
+            
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        function nextSlide() {
+            if (totalSlides === 0) return;
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateSlides();
+        }
+
+        function prevSlide() {
+            if (totalSlides === 0) return;
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            updateSlides();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlides();
+        }
+
         loadNews();
 
         // ─── TELEGRAM MINI APP ───
