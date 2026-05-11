@@ -591,22 +591,22 @@
                     currentSlide = 0;
                     updateSlides();
                     
-                    // Soporte para swipe táctil
-                    let touchStartX = 0;
-                    let touchEndX = 0;
-                    
+                    // Soporte para swipe táctil (seguro)
                     const carousel = document.querySelector('.news-carousel');
+                    if (carousel) {
+                        let touchStartX = 0;
+                        let touchEndX = 0;
                     
-                    carousel.addEventListener('touchstart', (e) => {
-                        touchStartX = e.changedTouches[0].screenX;
-                    }, {passive: true});
+                        carousel.addEventListener('touchstart', (e) => {
+                            touchStartX = e.changedTouches[0].screenX;
+                        }, {passive: true});
                     
-                    carousel.addEventListener('touchend', (e) => {
-                        touchEndX = e.changedTouches[0].screenX;
-                        if (touchEndX < touchStartX - 50) nextSlide();
-                        if (touchEndX > touchStartX + 50) prevSlide();
-                    });
-                }
+                        carousel.addEventListener('touchend', (e) => {
+                            touchEndX = e.changedTouches[0].screenX;
+                            if (touchEndX < touchStartX - 50) nextSlide();
+                            if (touchEndX > touchStartX + 50) prevSlide();
+                        });
+                    }
             } catch (err) {
                 console.log('Noticias no disponibles aún.');
                 newsTime.textContent = '';
