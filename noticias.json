@@ -1,8 +1,27 @@
 ```json
 {
-  "deportes": "Abanderan a delegación de Venezuela para Juegos Deportivas Bolivarianos. Entrevista a Astrid Inojosa y Luz Marina Vargas del baloncesto U17. Venezuela arrasa en...",
-  "espectaculos": "Globovisión abre sus puertas para el segundo casting presencial de Reinas y Reyes de Venezuela. Nuestra planta televisiva se convierte en el epicentro de la...",
-  "tecnologia": "Falcón se convierte en epicentro de la innovación con Fase Regional de las Olimpiadas de Robótica Creativa. mayo 9, 2026.",
-  "mensaje_motivador": "El Ucabista recopiló pensamientos aleccionadores de 15 compatriotas que han destacado por su espíritu ciudadano, sus logros y su amor por el..."
+  "actualizado": "16 de Mayo de 2024, 09:30 AM",
+  "noticias": [
+    {
+      "categoria": "🏅 Deportes",
+      "titulo": "¡Venezuela va con todo en los Bolivarianos!",
+      "resumen": "Nuestra delegación está lista para dejar el nombre del país en alto, con esa garra que nos caracteriza. Los chamos del baloncesto U17 andan que se las traen, ¡pura fibra criolla en la cancha!"
+    },
+    {
+      "categoria": "🎭 Espectáculos",
+      "titulo": "Reinas y Reyes de Venezuela: ¡La corona busca dueño!",
+      "resumen": "Globovisión se volvió una pasarela de sueños con el casting de Reinas y Reyes. Muchachas y muchachos con el tumbao venezolano buscando brillar, ¡la belleza criolla no tiene límites!"
+    },
+    {
+      "categoria": "💡 Tecnología",
+      "titulo": "¡Robots con sabor a cocada en Falcón!",
+      "resumen": "Falcón se puso las pilas con unas Olimpiadas de Robótica Creativa. Los carajitos programando bichos que parecen sacados de una película, ¡quién diría que los venezolanos somos tan pilosos para estas cosas!"
+    },
+    {
+      "categoria": "🌞 Motivación",
+      "titulo": "Mensaje del día: ¡No te rindas, mi pana!",
+      "resumen": "Recuerda que con constancia y esa chispa venezolana, no hay meta que se te resista. ¡Pa'lante es pa' allá!"
+    }
+  ]
 }
 ```
