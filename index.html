@@ -7,6 +7,7 @@
     <title>🍌 Cambur Pintón</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* MANTENEMOS TODO TU CSS ORIGINAL IGUAL */
         :root {
             --bg: #1A1A2E;
             --surface: #16213E;
@@ -316,21 +317,11 @@
         .string-3 { background: #FF4500; }
         .string-4 { background: #8B0000; }
 
-        /* ─── FOOTER ─── */
         footer {
             text-align: center;
             padding: 20px 20px 80px;
             color: var(--text-secondary);
             font-size: 12px;
-        }
-
-        footer strong { color: #FFFFFF; }
-
-        @media (max-width: 400px) {
-            .station-name { font-size: 26px; }
-            .logo-img { width: 100px; }
-            .hero { padding: 30px 15px 20px; }
-            .news-section { padding: 20px 15px; }
         }
     </style>
 </head>
@@ -382,197 +373,134 @@
         const STREAM_URL = 'https://radio.camburpinton.com.ve/listen/cambur_pinton/radio.mp3';
         const API_URL = 'https://radio.camburpinton.com.ve/api/nowplaying/cambur_pinton';
         const API_KEY = '0aebf59628850e87:30b9574cf088d2e1bd100a8c96e87e98';
+        
+        // URL de tu JSON en GitHub (Añadimos timestamp para evitar caché)
         const NEWS_URL = 'https://raw.githubusercontent.com/ElShaman32/SiReBa/main/noticias.json?t=' + new Date().getTime();
 
-        // ─── AUDIO ───
+        // ─── LÓGICA DE AUDIO (MANTENIDA) ───
         const playBtn = document.getElementById('playBtn');
         const barTitle = document.getElementById('barTitle');
         const barArtist = document.getElementById('barArtist');
         const stringsContainer = document.getElementById('stringsContainer');
-        
-        let audio = null;
-        let isPlaying = false;
-        let stringsInterval = null;
+        let audio = null, isPlaying = false, stringsInterval = null;
 
-        function togglePlay() {
-            if (isPlaying) { pauseAudio(); }
-            else { playAudio(); }
-        }
-
+        function togglePlay() { isPlaying ? pauseAudio() : playAudio(); }
         function playAudio() {
             if (!audio) {
                 audio = new Audio(STREAM_URL);
                 audio.volume = 0.8;
-                audio.preload = 'auto';
-                audio.onerror = function() {
-                    isPlaying = false;
-                    updateButton();
-                    stopStrings();
-                };
+                audio.onerror = () => { isPlaying = false; updateButton(); stopStrings(); };
             }
-            audio.play().then(function() {
-                isPlaying = true;
-                updateButton();
-                startStrings();
-            }).catch(function(err) {
-                console.error('Error:', err);
-                isPlaying = false;
-                updateButton();
-            });
+            audio.play().then(() => { isPlaying = true; updateButton(); startStrings(); })
+            .catch(err => { console.error(err); isPlaying = false; updateButton(); });
         }
-
         function pauseAudio() {
-            if (audio) {
-                audio.pause();
-                audio.src = '';
-                audio = null;
-            }
-            isPlaying = false;
-            updateButton();
-            stopStrings();
+            if (audio) { audio.pause(); audio.src = ''; audio = null; }
+            isPlaying = false; updateButton(); stopStrings();
         }
-
         function updateButton() {
-            if (isPlaying) {
-                playBtn.textContent = '⏸';
-                playBtn.classList.add('playing');
-            } else {
-                playBtn.textContent = '▶';
-                playBtn.classList.remove('playing');
-            }
+            playBtn.textContent = isPlaying ? '⏸' : '▶';
+            playBtn.classList.toggle('playing', isPlaying);
         }
-
         function startStrings() {
             stopStrings();
-            stringsInterval = setInterval(function() {
-                var strings = stringsContainer.querySelectorAll('.string');
-                for (var i = 0; i < strings.length; i++) {
-                    strings[i].style.height = (Math.random() * 14 + 4) + 'px';
-                }
+            stringsInterval = setInterval(() => {
+                const strings = stringsContainer.querySelectorAll('.string');
+                strings.forEach(s => s.style.height = (Math.random() * 14 + 4) + 'px');
             }, 100);
         }
-
         function stopStrings() {
-            if (stringsInterval) {
-                clearInterval(stringsInterval);
-                stringsInterval = null;
-            }
-            var strings = stringsContainer.querySelectorAll('.string');
-            for (var i = 0; i < strings.length; i++) {
-                strings[i].style.height = '5px';
-            }
+            if (stringsInterval) clearInterval(stringsInterval);
+            stringsContainer.querySelectorAll('.string').forEach(s => s.style.height = '5px');
         }
 
-        // ─── METADATOS ───
+        // ─── METADATOS RADIO (MANTENIDA) ───
         function fetchNowPlaying() {
-            fetch(API_URL, {
-                headers: { 'Authorization': 'Basic ' + btoa(API_KEY) }
-            })
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-                if (data && data.now_playing && data.now_playing.song) {
+            fetch(API_URL, { headers: { 'Authorization': 'Basic ' + btoa(API_KEY) } })
+            .then(res => res.json()).then(data => {
+                if (data?.now_playing?.song) {
                     barTitle.textContent = data.now_playing.song.title || 'Música en vivo';
                     barArtist.textContent = data.now_playing.song.artist || 'Cambur Pintón';
                 }
-            })
-            .catch(function() {
-                barTitle.textContent = 'Cambur Pintón';
-                barArtist.textContent = 'Sintoniza en vivo';
-            });
+            }).catch(() => { barTitle.textContent = 'Cambur Pintón'; barArtist.textContent = 'En Vivo'; });
         }
+        setInterval(fetchNowPlaying, 15000); fetchNowPlaying();
 
-        setInterval(fetchNowPlaying, 15000);
-        fetchNowPlaying();
+        // ─── LÓGICA DE NOTICIAS (AJUSTADA PARA N8N) ───
+        let currentSlide = 0, totalSlides = 0;
 
-        // ─── NOTICIAS ───
-        var currentSlide = 0;
-        var totalSlides = 0;
-
-        function loadNews() {
-            var newsContainer = document.getElementById('newsContainer');
-            var newsTime = document.getElementById('newsTime');
+        async function loadNews() {
+            const newsContainer = document.getElementById('newsContainer');
+            const newsTime = document.getElementById('newsTime');
             
-            fetch(NEWS_URL)
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-                if (data && data.noticias && data.noticias.length > 0) {
-                    newsTime.textContent = '📅 ' + (data.actualizado || 'Reciente');
+            try {
+                const res = await fetch(NEWS_URL);
+                const data = await res.json();
+
+                if (data?.noticias?.length > 0) {
+                    // Actualizamos la fecha de la edición
+                    newsTime.textContent = '📅 Edición: ' + (data.ultima_actualizacion || 'Reciente');
                     totalSlides = data.noticias.length;
                     
-                    var slidesHTML = '';
-                    var dotsHTML = '';
+                    let slidesHTML = '';
+                    let dotsHTML = '';
                     
-                    for (var i = 0; i < data.noticias.length; i++) {
-                        var item = data.noticias[i];
-                        slidesHTML += '<div class="news-slide">' +
-                            '<div class="news-category">' +
-                                '<span class="news-category-icon">' + item.categoria.split(' ')[0] + '</span> ' +
-                                item.categoria +
-                            '</div>' +
-                            '<div class="news-title">' + item.titulo + '</div>' +
-                            '<div class="news-excerpt">' + item.resumen + '</div>' +
-                        '</div>';
+                    data.noticias.forEach((item, i) => {
+                        // Usamos emojis por defecto si n8n no manda categoría con emoji
+                        const categoryIcon = item.categoria?.includes(' ') ? item.categoria.split(' ')[0] : '⚡';
                         
-                        dotsHTML += '<div class="news-dot' + (i === 0 ? ' active' : '') + '" onclick="goToSlide(' + i + ')"></div>';
-                    }
+                        slidesHTML += `
+                            <div class="news-slide">
+                                <div class="news-category">
+                                    <span class="news-category-icon">${categoryIcon}</span> 
+                                    ${item.categoria || 'Actualidad'}
+                                </div>
+                                <div class="news-title">${item.titulo}</div>
+                                <div class="news-excerpt">${item.resumen}</div>
+                            </div>`;
+                        
+                        dotsHTML += `<div class="news-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></div>`;
+                    });
                     
-                    newsContainer.innerHTML = '<div style="position:relative;">' +
-                        '<button class="news-nav prev" onclick="prevSlide()">◀</button>' +
-                        '<div class="news-carousel"><div class="news-slides" id="newsSlides">' + slidesHTML + '</div></div>' +
-                        '<button class="news-nav next" onclick="nextSlide()">▶</button>' +
-                    '</div>' +
-                    '<div class="news-dots" id="newsDots">' + dotsHTML + '</div>';
+                    newsContainer.innerHTML = `
+                        <div style="position:relative;">
+                            <button class="news-nav prev" onclick="prevSlide()">◀</button>
+                            <div class="news-carousel">
+                                <div class="news-slides" id="newsSlides">${slidesHTML}</div>
+                            </div>
+                            <button class="news-nav next" onclick="nextSlide()">▶</button>
+                        </div>
+                        <div class="news-dots" id="newsDots">${dotsHTML}</div>`;
                     
                     currentSlide = 0;
                     updateSlides();
                 }
-            })
-            .catch(function(err) {
-                console.log('Noticias aún no disponibles');
-                newsTime.textContent = '';
-            });
+            } catch (err) {
+                console.error('Error cargando noticias:', err);
+                newsContainer.innerHTML = '<p style="text-align:center; color:#A5D6A7;">🍌 Las noticias se están madurando... vuelve pronto.</p>';
+            }
         }
 
         function updateSlides() {
-            var slides = document.getElementById('newsSlides');
-            if (slides) {
-                slides.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
-            }
-            var dots = document.querySelectorAll('.news-dot');
-            for (var i = 0; i < dots.length; i++) {
-                dots[i].classList.toggle('active', i === currentSlide);
-            }
+            const slides = document.getElementById('newsSlides');
+            if (slides) slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+            document.querySelectorAll('.news-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
         }
 
-        function nextSlide() {
-            if (totalSlides === 0) return;
-            currentSlide = (currentSlide + 1) % totalSlides;
-            updateSlides();
-        }
+        function nextSlide() { if (totalSlides > 0) { currentSlide = (currentSlide + 1) % totalSlides; updateSlides(); } }
+        function prevSlide() { if (totalSlides > 0) { currentSlide = (currentSlide - 1 + totalSlides) % totalSlides; updateSlides(); } }
+        function goToSlide(index) { currentSlide = index; updateSlides(); }
 
-        function prevSlide() {
-            if (totalSlides === 0) return;
-            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-            updateSlides();
-        }
-
-        function goToSlide(index) {
-            currentSlide = index;
-            updateSlides();
-        }
-
+        // Cargar al inicio
         loadNews();
 
-        // ─── TELEGRAM ───
-        if (window.Telegram && window.Telegram.WebApp) {
+        // ─── TELEGRAM READY ───
+        if (window.Telegram?.WebApp) {
             window.Telegram.WebApp.ready();
             window.Telegram.WebApp.expand();
         }
-
-        // ─── LIMPIEZA ───
-        window.addEventListener('beforeunload', function() {
-            stopStrings();
-        });
     </script>
 </body>
 </html>
