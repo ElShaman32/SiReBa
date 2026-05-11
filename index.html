@@ -66,22 +66,22 @@
         }
 
         .logo-img {
-        width: 120px;
-        height: auto;
-        max-width: 100%;
-        filter: drop-shadow(0 0 25px rgba(124, 179, 66, 0.5));
-        animation: float 3s ease-in-out infinite;
-        border-radius: 50%;
-        border: 2px solid rgba(124, 179, 66, 0.3);
-        background: rgba(13, 40, 24, 0.6);
-        padding: 8px;
-        margin-bottom: 15px;
+            width: 120px;
+            height: auto;
+            max-width: 100%;
+            filter: drop-shadow(0 0 25px rgba(124, 179, 66, 0.5));
+            animation: float 3s ease-in-out infinite;
+            border-radius: 50%;
+            border: 2px solid rgba(124, 179, 66, 0.3);
+            background: rgba(13, 40, 24, 0.6);
+            padding: 8px;
+            margin-bottom: 15px;
         }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-}
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
 
         .station-name {
             font-size: 32px;
@@ -130,6 +130,13 @@
             background: #7CB342;
             margin: 8px auto 0;
             border-radius: 2px;
+        }
+
+        .news-update-time {
+            text-align: center;
+            font-size: 11px;
+            color: #7CB342;
+            margin-bottom: 15px;
         }
 
         .news-card {
@@ -356,6 +363,7 @@
         const STREAM_URL = 'https://radio.camburpinton.com.ve/listen/cambur_pinton/radio.mp3';
         const API_URL = 'https://radio.camburpinton.com.ve/api/nowplaying/cambur_pinton';
         const API_KEY = '0aebf59628850e87:30b9574cf088d2e1bd100a8c96e87e98';
+        const NEWS_URL = 'https://raw.githubusercontent.com/camburpinton/noticias/main/noticias.json'; // Actualizar cuando tengas el repo
 
         // ─── ELEMENTOS ───
         const playBtn = document.getElementById('playBtn');
@@ -471,55 +479,35 @@
         nowPlayingInterval = setInterval(fetchNowPlaying, 15000);
         fetchNowPlaying();
 
-        // ─── NOTICIAS ───
-const NEWS_WEBHOOK = 'https://n8n.camburpinton.com.ve/webhook/noticias';
-
-async function loadNews() {
-    const newsContainer = document.getElementById('newsContainer');
-    console.log('🔍 Intentando cargar noticias...');
-    
-    try {
-        const response = await fetch(NEWS_WEBHOOK);
-        console.log('📡 Respuesta recibida:', response.status);
-        
-        if (!response.ok) {
-            throw new Error('HTTP ' + response.status);
+        // ─── NOTICIAS DESDE GITHUB ───
+        async function loadNews() {
+            const newsContainer = document.getElementById('newsContainer');
+            try {
+                const response = await fetch(NEWS_URL);
+                if (!response.ok) throw new Error('No disponible');
+                const data = await response.json();
+                
+                if (data && data.noticias && data.noticias.length > 0) {
+                    const fecha = data.actualizado || 'Reciente';
+                    
+                    newsContainer.innerHTML = `
+                        <div class="news-update-time">📅 ${fecha}</div>
+                        ${data.noticias.map(item => `
+                            <div class="news-card">
+                                <div class="news-date">${item.categoria}</div>
+                                <div class="news-title">${item.titulo}</div>
+                                <div class="news-excerpt">${item.resumen}</div>
+                            </div>
+                        `).join('')}
+                    `;
+                }
+            } catch (err) {
+                console.log('Noticias no disponibles aún. Mostrando placeholder.');
+                // Mantiene el placeholder
+            }
         }
-        
-        const data = await response.json();
-        console.log('📰 Datos crudos:', data);
-        
-        // Algunas APIs envuelven los datos en un objeto "record"
-        let news = Array.isArray(data) ? data : (data.record || []);
-        
-        if (news.length > 0) {
-            console.log('✅ Noticias encontradas:', news.length);
-            newsContainer.innerHTML = news.map(item => `
-                <div class="news-card">
-                    <div class="news-date">${item.fecha || item.categoria || '📰 Noticia'}</div>
-                    <div class="news-title">${item.titulo || 'Sin título'}</div>
-                    <div class="news-excerpt">${item.resumen || item.contenido || ''}</div>
-                </div>
-            `).join('');
-        } else {
-            throw new Error('Array vacío');
-        }
-    } catch (err) {
-        console.log('⚠️ Noticias no disponibles:', err.message);
-        newsContainer.innerHTML = `
-            <div class="news-card">
-                <div class="news-date">🍌 Próximamente</div>
-                <div class="news-title">Noticias en camino</div>
-                <div class="news-excerpt">Estamos preparando contenido fresco para ti. ¡Vuelve pronto!</div>
-            </div>
-        `;
-    }
-}
 
-// Cargar noticias al iniciar
-loadNews();
-
-        // Intentar cargar noticias (no falla si el webhook no existe)
+        // Intentar cargar noticias
         loadNews();
 
         // ─── TELEGRAM MINI APP ───
@@ -536,6 +524,7 @@ loadNews();
 
         console.log('🍌 Cambur Pintón - Mini App lista');
         console.log('📻 Stream:', STREAM_URL);
+        console.log('📰 Noticias desde GitHub');
     </script>
 </body>
 </html>
