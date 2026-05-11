@@ -541,7 +541,7 @@
         nowPlayingInterval = setInterval(fetchNowPlaying, 15000);
         fetchNowPlaying();
 
-        // ─── NOTICIAS DESDE GITHUB ───
+                // ─── NOTICIAS DESDE GITHUB ───
         let currentSlide = 0;
         let totalSlides = 0;
 
@@ -558,20 +558,25 @@
                     newsTime.textContent = '📅 ' + (data.actualizado || 'Reciente');
                     totalSlides = data.noticias.length;
                     
-                    const slidesHTML = data.noticias.map((item, index) => `
-                        <div class="news-slide">
-                            <div class="news-category">
-                                <span class="news-category-icon">${item.categoria.split(' ')[0]}</span>
-                                ${item.categoria}
+                    let slidesHTML = '';
+                    for (let i = 0; i < data.noticias.length; i++) {
+                        const item = data.noticias[i];
+                        slidesHTML += `
+                            <div class="news-slide">
+                                <div class="news-category">
+                                    <span class="news-category-icon">${item.categoria.split(' ')[0]}</span>
+                                    ${item.categoria}
+                                </div>
+                                <div class="news-title">${item.titulo}</div>
+                                <div class="news-excerpt">${item.resumen}</div>
                             </div>
-                            <div class="news-title">${item.titulo}</div>
-                            <div class="news-excerpt">${item.resumen}</div>
-                        </div>
-                    `).join('');
+                        `;
+                    }
                     
-                    const dotsHTML = data.noticias.map((_, i) => `
-                        <div class="news-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></div>
-                    `).join('');
+                    let dotsHTML = '';
+                    for (let i = 0; i < data.noticias.length; i++) {
+                        dotsHTML += `<div class="news-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></div>`;
+                    }
                     
                     newsContainer.innerHTML = `
                         <div style="position:relative;">
@@ -590,6 +595,48 @@
                     
                     currentSlide = 0;
                     updateSlides();
+                }
+            } catch (err) {
+                console.log('Noticias no disponibles aún.');
+                newsTime.textContent = '';
+            }
+        }
+
+        function updateSlides() {
+            const slides = document.getElementById('newsSlides');
+            const dots = document.querySelectorAll('.news-dot');
+            
+            if (slides) {
+                slides.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
+            }
+            
+            for (let i = 0; i < dots.length; i++) {
+                if (i === currentSlide) {
+                    dots[i].classList.add('active');
+                } else {
+                    dots[i].classList.remove('active');
+                }
+            }
+        }
+
+        function nextSlide() {
+            if (totalSlides === 0) return;
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateSlides();
+        }
+
+        function prevSlide() {
+            if (totalSlides === 0) return;
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            updateSlides();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlides();
+        }
+
+        loadNews();
                     
                     // Soporte para swipe táctil (seguro)
                     const carousel = document.querySelector('.news-carousel');
