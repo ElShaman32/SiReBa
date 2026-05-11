@@ -4,26 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0D2818">
-    <meta name="description" content="Cambur Pintón - La Radio Más Chevere de Venezuela. Con El Cuatro Bien Afinado.">
-    <meta property="og:title" content="Cambur Pintón - La Radio Más Chevere de Venezuela">
-    <meta property="og:description" content="Con El Cuatro Bien Afinado.">
-    <meta property="og:image" content="https://radio.camburpinton.com.ve/static/uploads/background.1778449035.png">
-    <meta property="og:type" content="music.radio_station">
-    
     <title>🍌 Cambur Pintón</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
     <style>
         :root {
             --bg: #1A1A2E;
             --surface: #16213E;
             --cambur-yellow: #FFD700;
             --cambur-green: #7CB342;
-            --cambur-dark: #0D2818;
             --text: #FFFFFF;
             --text-secondary: #A5D6A7;
             --border: rgba(124, 179, 66, 0.2);
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             --radius: 16px;
         }
 
@@ -35,7 +26,6 @@
             color: var(--text);
             min-height: 100vh;
             line-height: 1.6;
-            overflow-x: hidden;
         }
 
         /* ─── HERO ─── */
@@ -50,20 +40,14 @@
         .hero::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background-image: url('https://radio.camburpinton.com.ve/static/uploads/background.1778449035.png');
             background-repeat: repeat;
             background-size: 60px;
             opacity: 0.04;
         }
 
-        .hero-content {
-            position: relative;
-            z-index: 1;
-        }
+        .hero-content { position: relative; z-index: 1; }
 
         .logo-img {
             width: 120px;
@@ -112,7 +96,6 @@
             padding: 30px 20px;
             max-width: 600px;
             margin: 0 auto;
-            position: relative;
         }
 
         .section-title {
@@ -172,9 +155,7 @@
             gap: 8px;
         }
 
-        .news-category-icon {
-            font-size: 20px;
-        }
+        .news-category-icon { font-size: 20px; }
 
         .news-title {
             font-size: 18px;
@@ -228,25 +209,13 @@
             align-items: center;
             justify-content: center;
             z-index: 10;
-            transition: all 0.2s;
         }
 
-        .news-nav:active {
-            background: rgba(124, 179, 66, 0.3);
-        }
-
+        .news-nav:active { background: rgba(124, 179, 66, 0.3); }
         .news-nav.prev { left: 5px; }
         .news-nav.next { right: 5px; }
 
-        .news-placeholder {
-            text-align: center;
-            color: var(--text-secondary);
-            font-style: italic;
-            padding: 30px 20px;
-            font-size: 14px;
-        }
-
-        /* ─── PLAYER FLOTANTE ─── */
+        /* ─── PLAYER ─── */
         .player-bar {
             position: fixed;
             bottom: 0;
@@ -271,15 +240,10 @@
             color: var(--cambur-green);
             font-size: 18px;
             cursor: pointer;
-            transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-        }
-
-        .player-btn:active {
-            transform: scale(0.95);
         }
 
         .player-btn.playing {
@@ -360,16 +324,19 @@
             font-size: 12px;
         }
 
-        footer strong {
-            color: #FFFFFF;
+        footer strong { color: #FFFFFF; }
+
+        @media (max-width: 400px) {
+            .station-name { font-size: 26px; }
+            .logo-img { width: 100px; }
+            .hero { padding: 30px 15px 20px; }
+            .news-section { padding: 20px 15px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ============================================================
-    🍌 HERO
-    ============================================================ -->
+    <!-- 🍌 HERO -->
     <header class="hero">
         <div class="hero-content">
             <img src="https://radio.camburpinton.com.ve/static/uploads/background.1778449035.png" alt="Cambur Pintón" class="logo-img">
@@ -379,33 +346,24 @@
         </div>
     </header>
 
-    <!-- ============================================================
-    📰 NOTICIAS
-    ============================================================ -->
+    <!-- 📰 NOTICIAS -->
     <section class="news-section">
         <h2 class="section-title">📰 El Pintón News</h2>
         <div class="news-update-time" id="newsTime"></div>
-        
         <div id="newsContainer">
-            <p class="news-placeholder">🍌 Cosechando noticias frescas...</p>
+            <p style="text-align:center;color:#A5D6A7;font-style:italic;padding:30px;">🍌 Cosechando noticias frescas...</p>
         </div>
     </section>
 
-    <!-- ============================================================
-    📱 FOOTER
-    ============================================================ -->
+    <!-- 📱 FOOTER -->
     <footer>
         <strong>Leonel Sira</strong> & <strong>Yennyfer Reverol</strong>
     </footer>
 
-    <!-- ============================================================
-    🎧 PLAYER FLOTANTE
-    ============================================================ -->
+    <!-- 🎧 PLAYER -->
     <div class="player-bar" id="playerBar">
         <button class="player-btn" id="playBtn" onclick="togglePlay()">▶</button>
-        <div class="live-indicator">
-            <div class="live-dot"></div> EN VIVO
-        </div>
+        <div class="live-indicator"><div class="live-dot"></div> EN VIVO</div>
         <div class="now-playing-info">
             <div class="now-playing-title" id="barTitle">Cambur Pintón</div>
             <div class="now-playing-artist" id="barArtist">Sintonizando</div>
@@ -418,34 +376,27 @@
         </div>
     </div>
 
-    <!-- ============================================================
-    🧠 SCRIPTS
-    ============================================================ -->
+    <!-- 🧠 SCRIPTS -->
     <script>
-        // ─── CONFIGURACIÓN ───
+        // ─── CONFIG ───
         const STREAM_URL = 'https://radio.camburpinton.com.ve/listen/cambur_pinton/radio.mp3';
         const API_URL = 'https://radio.camburpinton.com.ve/api/nowplaying/cambur_pinton';
         const API_KEY = '0aebf59628850e87:30b9574cf088d2e1bd100a8c96e87e98';
         const NEWS_URL = 'https://raw.githubusercontent.com/ElShaman32/SiReBa/refs/heads/main/noticias.json';
 
-        // ─── ELEMENTOS ───
+        // ─── AUDIO ───
         const playBtn = document.getElementById('playBtn');
         const barTitle = document.getElementById('barTitle');
         const barArtist = document.getElementById('barArtist');
         const stringsContainer = document.getElementById('stringsContainer');
-
-        // ─── AUDIO ───
+        
         let audio = null;
         let isPlaying = false;
         let stringsInterval = null;
-        let nowPlayingInterval = null;
 
         function togglePlay() {
-            if (isPlaying) {
-                pauseAudio();
-            } else {
-                playAudio();
-            }
+            if (isPlaying) { pauseAudio(); }
+            else { playAudio(); }
         }
 
         function playAudio() {
@@ -453,18 +404,18 @@
                 audio = new Audio(STREAM_URL);
                 audio.volume = 0.8;
                 audio.preload = 'auto';
-                audio.onerror = () => {
+                audio.onerror = function() {
                     isPlaying = false;
                     updateButton();
                     stopStrings();
                 };
             }
-            audio.play().then(() => {
+            audio.play().then(function() {
                 isPlaying = true;
                 updateButton();
                 startStrings();
-            }).catch(err => {
-                console.error('Error al reproducir:', err);
+            }).catch(function(err) {
+                console.error('Error:', err);
                 isPlaying = false;
                 updateButton();
             });
@@ -491,15 +442,13 @@
             }
         }
 
-        // ─── CUERDAS ANIMADAS ───
         function startStrings() {
             stopStrings();
-            stringsInterval = setInterval(() => {
-                const strings = stringsContainer.querySelectorAll('.string');
-                strings.forEach(s => {
-                    const h = Math.random() * 14 + 4;
-                    s.style.height = h + 'px';
-                });
+            stringsInterval = setInterval(function() {
+                var strings = stringsContainer.querySelectorAll('.string');
+                for (var i = 0; i < strings.length; i++) {
+                    strings[i].style.height = (Math.random() * 14 + 4) + 'px';
+                }
             }, 100);
         }
 
@@ -508,171 +457,93 @@
                 clearInterval(stringsInterval);
                 stringsInterval = null;
             }
-            const strings = stringsContainer.querySelectorAll('.string');
-            strings.forEach(s => s.style.height = '5px');
+            var strings = stringsContainer.querySelectorAll('.string');
+            for (var i = 0; i < strings.length; i++) {
+                strings[i].style.height = '5px';
+            }
         }
 
-        // ─── API: NOW PLAYING ───
-        async function fetchNowPlaying() {
-            try {
-                const response = await fetch(API_URL, {
-                    headers: {
-                        'Authorization': 'Basic ' + btoa(API_KEY)
-                    }
-                });
-                if (!response.ok) throw new Error('API error');
-                const data = await response.json();
-                updateNowPlaying(data);
-            } catch (err) {
-                console.error('Error fetching now playing:', err);
+        // ─── METADATOS ───
+        function fetchNowPlaying() {
+            fetch(API_URL, {
+                headers: { 'Authorization': 'Basic ' + btoa(API_KEY) }
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data && data.now_playing && data.now_playing.song) {
+                    barTitle.textContent = data.now_playing.song.title || 'Música en vivo';
+                    barArtist.textContent = data.now_playing.song.artist || 'Cambur Pintón';
+                }
+            })
+            .catch(function() {
                 barTitle.textContent = 'Cambur Pintón';
                 barArtist.textContent = 'Sintoniza en vivo';
-            }
+            });
         }
 
-        function updateNowPlaying(data) {
-            if (data && data.now_playing && data.now_playing.song) {
-                const song = data.now_playing.song;
-                barTitle.textContent = song.title || 'Música en vivo';
-                barArtist.textContent = song.artist || 'Cambur Pintón';
-            }
-        }
-
-        nowPlayingInterval = setInterval(fetchNowPlaying, 15000);
+        setInterval(fetchNowPlaying, 15000);
         fetchNowPlaying();
 
-                // ─── NOTICIAS DESDE GITHUB ───
-        let currentSlide = 0;
-        let totalSlides = 0;
+        // ─── NOTICIAS ───
+        var currentSlide = 0;
+        var totalSlides = 0;
 
-        async function loadNews() {
-            const newsContainer = document.getElementById('newsContainer');
-            const newsTime = document.getElementById('newsTime');
+        function loadNews() {
+            var newsContainer = document.getElementById('newsContainer');
+            var newsTime = document.getElementById('newsTime');
             
-            try {
-                const response = await fetch(NEWS_URL);
-                if (!response.ok) throw new Error('No disponible');
-                const data = await response.json();
-                
+            fetch(NEWS_URL)
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
                 if (data && data.noticias && data.noticias.length > 0) {
                     newsTime.textContent = '📅 ' + (data.actualizado || 'Reciente');
                     totalSlides = data.noticias.length;
                     
-                    let slidesHTML = '';
-                    for (let i = 0; i < data.noticias.length; i++) {
-                        const item = data.noticias[i];
-                        slidesHTML += `
-                            <div class="news-slide">
-                                <div class="news-category">
-                                    <span class="news-category-icon">${item.categoria.split(' ')[0]}</span>
-                                    ${item.categoria}
-                                </div>
-                                <div class="news-title">${item.titulo}</div>
-                                <div class="news-excerpt">${item.resumen}</div>
-                            </div>
-                        `;
+                    var slidesHTML = '';
+                    var dotsHTML = '';
+                    
+                    for (var i = 0; i < data.noticias.length; i++) {
+                        var item = data.noticias[i];
+                        slidesHTML += '<div class="news-slide">' +
+                            '<div class="news-category">' +
+                                '<span class="news-category-icon">' + item.categoria.split(' ')[0] + '</span> ' +
+                                item.categoria +
+                            '</div>' +
+                            '<div class="news-title">' + item.titulo + '</div>' +
+                            '<div class="news-excerpt">' + item.resumen + '</div>' +
+                        '</div>';
+                        
+                        dotsHTML += '<div class="news-dot' + (i === 0 ? ' active' : '') + '" onclick="goToSlide(' + i + ')"></div>';
                     }
                     
-                    let dotsHTML = '';
-                    for (let i = 0; i < data.noticias.length; i++) {
-                        dotsHTML += `<div class="news-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></div>`;
-                    }
-                    
-                    newsContainer.innerHTML = `
-                        <div style="position:relative;">
-                            <button class="news-nav prev" onclick="prevSlide()">◀</button>
-                            <div class="news-carousel">
-                                <div class="news-slides" id="newsSlides">
-                                    ${slidesHTML}
-                                </div>
-                            </div>
-                            <button class="news-nav next" onclick="nextSlide()">▶</button>
-                        </div>
-                        <div class="news-dots" id="newsDots">
-                            ${dotsHTML}
-                        </div>
-                    `;
+                    newsContainer.innerHTML = '<div style="position:relative;">' +
+                        '<button class="news-nav prev" onclick="prevSlide()">◀</button>' +
+                        '<div class="news-carousel"><div class="news-slides" id="newsSlides">' + slidesHTML + '</div></div>' +
+                        '<button class="news-nav next" onclick="nextSlide()">▶</button>' +
+                    '</div>' +
+                    '<div class="news-dots" id="newsDots">' + dotsHTML + '</div>';
                     
                     currentSlide = 0;
                     updateSlides();
                 }
-            } catch (err) {
-                console.log('Noticias no disponibles aún.');
+            })
+            .catch(function(err) {
+                console.log('Noticias aún no disponibles');
                 newsTime.textContent = '';
-            }
-        }
-
-        function updateSlides() {
-            const slides = document.getElementById('newsSlides');
-            const dots = document.querySelectorAll('.news-dot');
-            
-            if (slides) {
-                slides.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
-            }
-            
-            for (let i = 0; i < dots.length; i++) {
-                if (i === currentSlide) {
-                    dots[i].classList.add('active');
-                } else {
-                    dots[i].classList.remove('active');
-                }
-            }
-        }
-
-        function nextSlide() {
-            if (totalSlides === 0) return;
-            currentSlide = (currentSlide + 1) % totalSlides;
-            updateSlides();
-        }
-
-        function prevSlide() {
-            if (totalSlides === 0) return;
-            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-            updateSlides();
-        }
-
-        function goToSlide(index) {
-            currentSlide = index;
-            updateSlides();
-        }
-
-        loadNews();
-                    
-                    // Soporte para swipe táctil (seguro)
-                    const carousel = document.querySelector('.news-carousel');
-                    if (carousel) {
-                        let touchStartX = 0;
-                        let touchEndX = 0;
-                    
-                        carousel.addEventListener('touchstart', (e) => {
-                            touchStartX = e.changedTouches[0].screenX;
-                        }, {passive: true});
-                    
-                        carousel.addEventListener('touchend', (e) => {
-                            touchEndX = e.changedTouches[0].screenX;
-                            if (touchEndX < touchStartX - 50) nextSlide();
-                            if (touchEndX > touchStartX + 50) prevSlide();
-                        });
-                    }
-            } catch (err) {
-                console.log('Noticias no disponibles aún.');
-                newsTime.textContent = '';
-            }
-        }
-
-        function updateSlides() {
-            const slides = document.getElementById('newsSlides');
-            const dots = document.querySelectorAll('.news-dot');
-            
-            if (slides) {
-                slides.style.transform = `translateX(-${currentSlide * 100}%)`;
-            }
-            
-            dots.forEach((dot, index) => {
-                dot.classList.toggle('active', index === currentSlide);
             });
         }
 
+        function updateSlides() {
+            var slides = document.getElementById('newsSlides');
+            if (slides) {
+                slides.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
+            }
+            var dots = document.querySelectorAll('.news-dot');
+            for (var i = 0; i < dots.length; i++) {
+                dots[i].classList.toggle('active', i === currentSlide);
+            }
+        }
+
         function nextSlide() {
             if (totalSlides === 0) return;
             currentSlide = (currentSlide + 1) % totalSlides;
@@ -692,21 +563,16 @@
 
         loadNews();
 
-        // ─── TELEGRAM MINI APP ───
+        // ─── TELEGRAM ───
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
             window.Telegram.WebApp.expand();
         }
 
         // ─── LIMPIEZA ───
-        window.addEventListener('beforeunload', () => {
-            if (nowPlayingInterval) clearInterval(nowPlayingInterval);
+        window.addEventListener('beforeunload', function() {
             stopStrings();
         });
-
-        console.log('🍌 Cambur Pintón - Mini App lista');
-        console.log('📻 Stream:', STREAM_URL);
-        console.log('📰 Noticias desde GitHub');
     </script>
 </body>
 </html>
