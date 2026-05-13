@@ -1,0 +1,12 @@
+[
+  {
+    "nombre": "Capitan Facundo",
+    "descripcion": "Breve descripción de quién es o qué hace",
+    "video_id": "https://www.youtube.com/watch?v=2AFvCoK8P7s&list=RD2AFvCoK8P7s&start_radio=1"
+  },
+  {
+    "nombre": "Organización Musical Orión",
+    "descripcion": "Breve descripción de quién es o qué hace",
+    "video_id": "https://www.youtube.com/watch?v=0PvMKi51Kfk&list=RD0PvMKi51Kfk&start_radio=1"
+  }
+]
