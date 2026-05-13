@@ -1,25 +1,10 @@
 {
-  "actualizado": "$(current_date_time)",
+  "actualizado": "17 de abril de 2026",
   "noticias": [
     {
-      "categoria": "🏅 Deportes",
-      "titulo": "Selección Nacional de Fútbol ganó el Mundial sub-20, ¡qué alegría!",
-      "resumen": "¿No te acordabas? La selección nacional volvió a brillar en el mundo del fútbol. ¡Qué orgullo para los venezolanos!"
-    },
-    {
-      "categoria": "🎭 Espectáculos",
-      "titulo": "¡El concurso de baile más esperado de Venezuela: ¿Quién ganará este año?",
-      "resumen": "La competencia es feroz, pero solo uno puede ser el campeón. ¡Descúbrelo en vivo por la radio más chevere de Venezuela!"
-    },
-    {
-      "categoria": "💡 Tecnología",
-      "titulo": "Desarrolladores venezolanos crearon una app para ayudar a los ancianos con sus necesidades diarias.",
-      "resumen": "¿Sabías que hay aplicaciones para todo? Los ingenieros de Venezuela están revolucionando la tecnología con soluciones prácticas y divertidas. ¡Mira cómo funcionan!"
-    },
-    {
-      "categoria": "🌞 Motivación",
-      "titulo": "Mensaje del día: No te rindas, Venezuela sigue adelante.",
-      "resumen": "¡Siempre hay esperanza! Los venezolanos somos fuertes y resilientes. ¡No te rindas y siga adelante!"
+      "categoria": "",
+      "titulo": "Ejecutivo Nacional instruyó que el programa Cambur Pintón llegue a todas las escuelas.",
+      "resumen": "El Ejecutivo Nacional instruyó que el programa Cambur Pintón llegue a todas las escuelas. 17 de abril de 2026. Comunicación y CulturaDestacada. La ..."
     }
   ]
 }
