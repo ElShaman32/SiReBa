@@ -17,5 +17,23 @@
       "instagram": "https://instagram.com/mcpinton",
       "youtube": "https://youtube.com/@mcpinton"
     }
+   
+    "nombre": "DJ Cambur",
+    "descripcion": "El que pone el sabor tropical en las mañanas",
+    "foto": "dj-cambur.jpg",
+    "redes": {
+      "instagram": "https://instagram.com/djcambur",
+      "tiktok": "https://tiktok.com/@djcambur"
+    },
+    "video_id": "código-de-youtube"
+  },
+  {
+    "nombre": "MC Pintón",
+    "descripcion": "La voz más chevere del mediodía",
+    "foto": "mc-pinton.jpg",
+    "redes": {
+      "instagram": "https://instagram.com/mcpinton",
+      "youtube": "https://youtube.com/@mcpinton"
+    } 
   }
 ]
