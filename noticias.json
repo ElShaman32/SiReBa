@@ -1,25 +1,25 @@
 {
-  "actualizado": "18 de mayo de 2024, 10:30 AM",
+  "actualizado": "$(current_date_time)",
   "noticias": [
     {
       "categoria": "🏅 Deportes",
-      "titulo": "¡Arepas con sabor a jonrón! La LVBP prende los motores en pleno mayo",
-      "resumen": "Aunque estemos en mayo, ya el guaguancó beisbolero se siente en el aire venezolano. Los equipos de la LVBP están más activos que cucaracha en baile de gallinas, ¡entrenando y firmando para la temporada que viene! ¿Será que este año el Caracas rompe el maleficio o los Magallanes vuelven a dar la pela? ¡Pura candela la que se viene en el diamante criollo!"
+      "titulo": "Neymar da Silva de Cambur Pintón: Su último gol en Copa América!",
+      "resumen": "¡No te lo pierdas! Neymar volvió a marcar a su país con estilo y humor venezolano. ¡Elogió al equipo desde la tribuna y el público responde con gritos de guerra!"
     },
     {
       "categoria": "🎭 Espectáculos",
-      "titulo": "El nuevo tema de Guaco 'La Fiesta del Tostón' causa furor en las redes",
-      "resumen": "¡Agárrense que la Súper Banda de Venezuela, Guaco, soltó un nuevo bombazo musical que tiene a todo el mundo bailando! 'La Fiesta del Tostón' es el nombre de esta joya que ya suena en cada esquina y en todas las radios. Con un ritmo pegajoso y letras que evocan la alegría de nuestra tierra, este tema promete ser la banda sonora de todas nuestras parrandas. ¡A mover el esqueleto se ha dicho!"
+      "titulo": "Famosa cantante en apuros: Qué pasó en los ensayos",
+      "resumen": "¡Qué emocionante! La estrella más comentada del país, Ximena Vargas, tuvo que reemplazar a su compañera por un minuto. ¿Se salvó? ¡Descúbrelo aquí!"
     },
     {
       "categoria": "💡 Tecnología",
-      "titulo": "El 'ChatGPT con acento' llegó para hablarnos en criollito",
-      "resumen": "¡Atención, mi gente! Llegó una nueva inteligencia artificial que no solo te entiende, ¡sino que te responde con nuestro propio tumbao! Imagínate preguntarle dónde conseguir la mejor empanada de cazón y que te diga '¡Ah, mijito, esa está en la esquina de la panadería de la Tere, esa sí que sabe a gloria!' ¡Ahora sí que la tecnología se puso más criolla que una hallaca!"
+      "titulo": "El primer robot de cocina casero: Se alimenta del jaleo y cocina autónomamente",
+      "resumen": "¡Qué novedad! Los ingenieros venezolanos han desarrollado un robot que cocina en su propia cocina. ¡Mira cómo funciona esta 'mujerazza' sin manos!"
     },
     {
       "categoria": "🌞 Motivación",
-      "titulo": "Mensaje del día: ¡No dejes que te roben el chivo!",
-      "resumen": "Hoy te recordamos que la vida es como una buena arepa: hay que rellenarla de cosas buenas. No dejes que los problemas te quiten las ganas, ¡échale pichón que pa' lante es pa' allá y con fe todo se logra!"
+      "titulo": "Mensaje del día",
+      "resumen": "¡Venezuela no es el fin de todo! Siempre hay esperanza en medio de los desafíos. ¡Sierra Grande, te apoyamos!"
     }
   ]
 }
