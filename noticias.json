@@ -1,10 +1,24 @@
-{
-  "actualizado": "17 de abril de 2026",
+{  "actualizado": "17 de abril de 2026",
   "noticias": [
     {
-      "categoria": "",
-      "titulo": "Ejecutivo Nacional instruyó que el programa Cambur Pintón llegue a todas las escuelas.",
-      "resumen": "El Ejecutivo Nacional instruyó que el programa Cambur Pintón llegue a todas las escuelas. 17 de abril de 2026. Comunicación y CulturaDestacada. La ..."
+      "categoria": "🏅 Deportes",
+      "titulo": "¡El 'areperazo' venció al 'hallacaazo' en el clásico escolar!",
+      "resumen": "En un partido lleno de emoción, el equipo del Liceo Simón Bolívar, vestido de color arepa dorada, derrotó a sus rivales del Colegio Sucre. El goleador confesó: 'Solo pensaba en la hallaca de mi abuela'."
+    },
+    {
+      "categoria": "🎭 Espectáculos",
+      "titulo": "La telenovela 'Cambur en la Luna' estrena tema de Güachinche",
+      "resumen": "La nueva serie protagonizada por el youtuber Nacho Gómez arrancó con un tema musical basado en el canto de la Güachinche. El director aseguró: 'Queremos que el criollo llegue hasta Marte'."
+    },
+    {
+      "categoria": "💡 Tecnología",
+      "titulo": "Inventan la 'arepametrópolis': app que traduce arepas a binario",
+      "resumen": "Un grupo de 'nerds' caraqueños lanzó una aplicación que convierte imágenes de arepas en código binario. 'Es para que hasta la abuela entienda la tecnología', explicó el creador."
+    },
+    {
+      "categoria": "🌞 Motivación",
+      "titulo": "¡No te quedes en la arepa!",
+      "resumen": "Hoy es día de moverse como el pata de cangrejo: hacia adelante aunque la vida te empuje para atrás. ¡Vamos Venezuela, que el Cambur siempre da vuelta!"
     }
   ]
 }
