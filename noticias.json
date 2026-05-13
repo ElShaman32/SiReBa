@@ -3,23 +3,23 @@
   "noticias": [
     {
       "categoria": "🏅 Deportes",
-      "titulo": "Neymar da Silva de Cambur Pintón: Su último gol en Copa América!",
-      "resumen": "¡No te lo pierdas! Neymar volvió a marcar a su país con estilo y humor venezolano. ¡Elogió al equipo desde la tribuna y el público responde con gritos de guerra!"
+      "titulo": "Selección Nacional de Fútbol ganó el Mundial sub-20, ¡qué alegría!",
+      "resumen": "¿No te acordabas? La selección nacional volvió a brillar en el mundo del fútbol. ¡Qué orgullo para los venezolanos!"
     },
     {
       "categoria": "🎭 Espectáculos",
-      "titulo": "Famosa cantante en apuros: Qué pasó en los ensayos",
-      "resumen": "¡Qué emocionante! La estrella más comentada del país, Ximena Vargas, tuvo que reemplazar a su compañera por un minuto. ¿Se salvó? ¡Descúbrelo aquí!"
+      "titulo": "¡El concurso de baile más esperado de Venezuela: ¿Quién ganará este año?",
+      "resumen": "La competencia es feroz, pero solo uno puede ser el campeón. ¡Descúbrelo en vivo por la radio más chevere de Venezuela!"
     },
     {
       "categoria": "💡 Tecnología",
-      "titulo": "El primer robot de cocina casero: Se alimenta del jaleo y cocina autónomamente",
-      "resumen": "¡Qué novedad! Los ingenieros venezolanos han desarrollado un robot que cocina en su propia cocina. ¡Mira cómo funciona esta 'mujerazza' sin manos!"
+      "titulo": "Desarrolladores venezolanos crearon una app para ayudar a los ancianos con sus necesidades diarias.",
+      "resumen": "¿Sabías que hay aplicaciones para todo? Los ingenieros de Venezuela están revolucionando la tecnología con soluciones prácticas y divertidas. ¡Mira cómo funcionan!"
     },
     {
       "categoria": "🌞 Motivación",
-      "titulo": "Mensaje del día",
-      "resumen": "¡Venezuela no es el fin de todo! Siempre hay esperanza en medio de los desafíos. ¡Sierra Grande, te apoyamos!"
+      "titulo": "Mensaje del día: No te rindas, Venezuela sigue adelante.",
+      "resumen": "¡Siempre hay esperanza! Los venezolanos somos fuertes y resilientes. ¡No te rindas y siga adelante!"
     }
   ]
 }
